@@ -1,19 +1,21 @@
 from datetime import date
+from itertools import product
 from random import choice
 from typing import Iterator
 
 import pytest
-from recall_me.date_parser import TextDateParser
+from recall_me.date_parser import DayTextDateParser
+from recall_me.date_parser.utils import DAY_NUM_2_NAME
 from recall_me.date_parser.utils import MONTH_NUM_2_NAME as MONTHS
 
 from .constants import DATES, Faker
 
 
-def generate_text_month_dates(d: date) -> Iterator[tuple[str, date]]:
-    month: int = d.month
-    options: list[str] = MONTHS[month]
+def generate_text_daymonth_dates(d: date) -> Iterator[tuple[str, date]]:
+    month_options: list[str] = MONTHS[d.month]
+    day_options: list[str] = DAY_NUM_2_NAME[d.day]
 
-    for option in options:
+    for day_option, month_option in product(day_options, month_options):
         date_format: str
         with_year: bool
         for date_format, with_year in [
@@ -22,7 +24,6 @@ def generate_text_month_dates(d: date) -> Iterator[tuple[str, date]]:
             ("{month} {day}", False),
             ("{month} {day} {year}", True),
             ("{year} {day} {month}", True),
-            ("{year} {month} {day}", True),
         ]:
             year: int = d.year
             if not with_year:
@@ -36,15 +37,12 @@ def generate_text_month_dates(d: date) -> Iterator[tuple[str, date]]:
                 formatted_year_2d = f"0{year_2d}"
 
             for f_year in (str(year), formatted_year_2d):
-                # skip 03 апреля 18
-                if date_format == "{year} {month} {day}" and len(f_year) < 4:
-                    continue
                 yield (
                     Faker.pystr()
                     + " "
                     + date_format.format(
-                        day=d.day,
-                        month=option,
+                        day=day_option,
+                        month=month_option,
                         year=f_year,
                     )
                     + " "
@@ -53,7 +51,7 @@ def generate_text_month_dates(d: date) -> Iterator[tuple[str, date]]:
                 )
 
 
-def generate_any_text_month_dates(
+def generate_any_text_daymonth_dates(
     dates: list[date],
 ) -> Iterator[tuple[str, list[date]]]:
     for d in dates:
@@ -61,7 +59,7 @@ def generate_any_text_month_dates(
         random_dates: list[date] = [d] + [choice(dates) for _ in range(date_num)]
 
         random_sentences: list[tuple[str, date]] = [
-            choice(list(generate_text_month_dates(random_date)))
+            choice(list(generate_text_daymonth_dates(random_date)))
             for random_date in random_dates
         ]
 
@@ -71,7 +69,7 @@ def generate_any_text_month_dates(
         yield (sentence, expected_dates)
 
 
-@pytest.mark.parametrize("sentence, expected", generate_any_text_month_dates(DATES))
-def test_text_month_single_date(sentence: str, expected: list[date]) -> None:
-    results: list[date] = TextDateParser().parse(sentence)
+@pytest.mark.parametrize("sentence, expected", generate_any_text_daymonth_dates(DATES))
+def test_text_daymonth_dates(sentence: str, expected: list[date]) -> None:
+    results: list[date] = DayTextDateParser().parse(sentence)
     assert set(expected) == set(results)

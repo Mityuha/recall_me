@@ -135,3 +135,4 @@ request.sh
 # End of https://www.gitignore.io/api/python
 
 data/
+.DS_STORE

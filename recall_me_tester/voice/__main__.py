@@ -1,14 +1,22 @@
 import json
 from datetime import date
 from pathlib import Path
+from tempfile import TemporaryDirectory
+from zipfile import ZipFile
 
 import pyaudio
 from recall_me.date_parser import MONTH_NUM_2_NAME, DayTextDateParser
 from vosk import KaldiRecognizer, Model
 
-model_path = Path(__file__).parent / "vosk-model-small-ru-0.22"
+model_name = Path("vosk-model-small-ru-0.22.zip")
+zip_model = ZipFile(Path(__file__).parent / model_name)
 
-model = Model(str(model_path))
+
+with TemporaryDirectory() as tempdir:
+    zip_model.extractall(tempdir)
+
+    model = Model(str(Path(tempdir) / model_name.stem))
+
 recognizer = KaldiRecognizer(model, 16000)
 
 mic = pyaudio.PyAudio()

@@ -4,11 +4,7 @@ from typing import Final
 
 from recall_me.logging import logger
 
-SEPARATOR: Final[str] = r" /|.-"
-SEPARATOR_R: Final[str] = f"[{SEPARATOR}]"
-DAY_R: Final[str] = "(3[01]|[12][0-9]|0?[1-9])"
-MONTH_R: Final[str] = "(1[0-2]|0?[1-9])"
-YEAR_R: Final[str] = "((?:[0-9]{2})[0-9]{2})"
+from .utils import DAY_R, MONTH_R, SEPARATOR_R, YEAR_R
 
 # Important note: sort patterns by length's descending order
 DEFAULT_PATTERNS: Final[list[str]] = [

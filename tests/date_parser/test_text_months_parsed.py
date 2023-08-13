@@ -28,9 +28,9 @@ def generate_text_month_dates(d: date) -> Iterator[tuple[str, date]]:
     options: list[str] = MONTHS[month]
 
     for option in options:
-        fmt: str
+        date_format: str
         with_year: bool
-        for fmt, with_year in [
+        for date_format, with_year in [
             ("{day} {month}", False),
             ("{day} {month} {year}", True),
             ("{month} {day}", False),
@@ -44,13 +44,27 @@ def generate_text_month_dates(d: date) -> Iterator[tuple[str, date]]:
                 if date(year, d.month, d.day) < date.today():
                     year += 1
 
-            yield (
-                Faker.pystr()
-                + " "
-                + fmt.format(day=d.day, month=option, year=year)
-                + " "
-                + Faker.pystr()
-            ), date(year=year, month=d.month, day=d.day)
+            year_2d: int = d.year % 1000 % 100
+            formatted_year_2d: str = str(year_2d)
+            if year_2d < 10:
+                formatted_year_2d = f"0{year_2d}"
+
+            for f_year in (str(year), formatted_year_2d):
+                # skip 03 апреля 18
+                if date_format == "{year} {month} {day}" and len(f_year) < 4:
+                    continue
+                yield (
+                    Faker.pystr()
+                    + " "
+                    + date_format.format(
+                        day=d.day,
+                        month=option,
+                        year=f_year,
+                    )
+                    + " "
+                    + Faker.pystr(),
+                    date(year=year, month=d.month, day=d.day),
+                )
 
 
 def generate_any_text_month_dates(

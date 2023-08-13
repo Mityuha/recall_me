@@ -8,7 +8,7 @@ from recall_me.logging import logger
 from .interfaces import Stemmer
 from .utils import DAY_R, MONTH_NAME_2_NUM
 from .utils import MONTH_TEXT_R as MONTH_R
-from .utils import SEPARATOR_R, YEAR_R
+from .utils import SEPARATOR_R, YEAR_R, full_year
 
 DEFAULT_PATTERNS: Final[dict[str, str]] = {
     "day month year": f"{SEPARATOR_R}".join([DAY_R, MONTH_R, YEAR_R]),
@@ -74,7 +74,7 @@ class TextDateParser:
                     return MONTH_NAME_2_NUM[p[pattern_parts["month"]]]
 
                 def year(p):
-                    return int(p[pattern_parts["year"]])
+                    return full_year(int(p[pattern_parts["year"]]))
 
                 if len(parts) == 3:
                     matches.append(

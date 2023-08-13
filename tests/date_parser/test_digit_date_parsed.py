@@ -1,6 +1,6 @@
 from datetime import date
 from random import choice
-from typing import Callable, Final, Iterator
+from typing import Iterator
 
 import pytest
 from faker import Faker as FakerType
@@ -11,42 +11,39 @@ from .constants import DATES
 Faker = FakerType()
 
 
-PRETTY_FORMAT: Final[dict[str, Callable[[date], int]]] = {
-    "day": lambda d: d.day,
-    "month": lambda d: d.month,
-    "year": lambda d: d.year,
-}
-
-
-def format_with_any_text(
-    d: date,
-    date_format: str,
-    separator: str,
-) -> str:
-    formatters: list[Callable] = [PRETTY_FORMAT[fmt] for fmt in date_format.split(" ")]
-    values: list[str] = [str(fmt(d)) for fmt in formatters]
-    separated_values: str = f"{separator}".join(values)
-    return Faker.pystr() + " " + separated_values + " " + Faker.pystr()
-
-
 def single_date_sentences(d: date) -> Iterator[tuple[str, date]]:
-    for separator in r"./ \|":
-        for date_format, with_year in (
-            ("day month", False),
-            ("day month year", True),
-        ):
-            expected_date = d
-            if not with_year:
-                expected_date = date(date.today().year, d.month, d.day)
-                if expected_date < date.today():
-                    expected_date = date(date.today().year + 1, d.month, d.day)
+    separators = r"./ \|"
+    sep_1 = choice(separators)
+    sep_2 = choice(separators)
+    for date_format, with_year in (
+        ("{day}{separator1}{month}", False),
+        ("{day}{separator1}{month}{separator2}{year}", True),
+    ):
+        year: int = d.year
+        if not with_year:
+            year = date.today().year
+            if date(year, d.month, d.day) < date.today():
+                year += 1
+
+        year_2d: int = d.year % 1000 % 100
+        formatted_year_2d: str = str(year_2d)
+        if year_2d < 10:
+            formatted_year_2d = f"0{year_2d}"
+
+        for f_year in (str(year), formatted_year_2d):
             yield (
-                format_with_any_text(
-                    d,
-                    date_format=date_format,
-                    separator=separator,
-                ),
-                expected_date,
+                Faker.pystr()
+                + " "
+                + date_format.format(
+                    day=d.day,
+                    month=d.month,
+                    year=f_year,
+                    separator1=sep_1,
+                    separator2=sep_2,
+                )
+                + " "
+                + Faker.pystr(),
+                date(year=year, month=d.month, day=d.day),
             )
 
 

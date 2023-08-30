@@ -37,19 +37,18 @@ def main() -> None:
 
     recognizer = create_recognizer()
     ogg_2_wav = Ogg2WavConverter()
-    with ogg_2_wav:
-        voice_handler = VoiceHandler(recognizer, ogg_2_wav=ogg_2_wav)
+    voice_handler = VoiceHandler(recognizer, ogg_2_wav=ogg_2_wav)
 
-        # on non command i.e message - echo the message on Telegram
-        application.add_handler(
-            MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler)
-        )
-        application.add_handler(
-            MessageHandler(filters.VOICE & ~filters.COMMAND, voice_handler)
-        )
+    # on non command i.e message - echo the message on Telegram
+    application.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, text_handler)
+    )
+    application.add_handler(
+        MessageHandler(filters.VOICE & ~filters.COMMAND, voice_handler)
+    )
 
-        # Run the bot until the user presses Ctrl-C
-        application.run_polling(allowed_updates=Update.ALL_TYPES)
+    # Run the bot until the user presses Ctrl-C
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
 if __name__ == "__main__":

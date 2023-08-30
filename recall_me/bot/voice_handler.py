@@ -7,7 +7,12 @@ from telegram.ext import ContextTypes
 
 
 class VoiceHandler:
-    def __init__(self, voice_2_text: Any, *, ogg_2_wav: Any) -> None:
+    def __init__(
+        self,
+        voice_2_text: Any,
+        *,
+        ogg_2_wav: Any,
+    ) -> None:
         self.voice_2_text: Final = voice_2_text
         self.ogg_2_wav: Final = ogg_2_wav
 
@@ -29,19 +34,14 @@ class VoiceHandler:
 
         wav_bytes: bytes = self.ogg_2_wav.convert(ogg_bytes)
 
-        logger.debug(f"{self}: wav file converted ({len(wav_bytes)} bytes)")
+        self.voice_2_text.AcceptWaveform(wav_bytes)
+        data: str = (
+            self.voice_2_text.Result()
+            or self.voice_2_text.PartialResult()
+            or self.voice_2_text.FinalResult()
+        )
 
-        if self.voice_2_text.AcceptWaveform(wav_bytes):
-            print(">>>", self.voice_2_text.PartialResult())
-            print(">>>", self.voice_2_text.Result())
-            print(">>>", self.voice_2_text.FinalResult())
-            text = self.voice_2_text.Result()
-            result: dict = json.loads(text)
-            logger.debug(f"Parsed text: {result.get('text')}")
-        else:
-            logger.warning("Cannot recognize text...")
-
-        with open("test.wav", "wb") as f:
-            f.write(wav_bytes)
-        with open("test.ogg", "wb") as f:
-            f.write(bytes(ogg_bytes))
+        logger.debug(f"{self}: parsed data: {data}")
+        result: dict = json.loads(data)
+        text: str = result.get("text", "") or result.get("partial", "")
+        logger.debug(f"Parsed text: {text}")

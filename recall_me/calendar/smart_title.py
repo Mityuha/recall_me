@@ -22,7 +22,6 @@ class SmartTitle:
         title_words: list[str] = []
 
         matcher: re.Pattern = re.compile(r"[a-zа-я]")
-        print(words)
         for orig_word in words:
             if len(title_words) >= self.max_words:
                 break

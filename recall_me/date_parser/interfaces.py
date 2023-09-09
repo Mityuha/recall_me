@@ -1,10 +1,6 @@
 import re
+from datetime import date
 from typing import Iterable, Protocol
-
-
-class Stemmer(Protocol):
-    def stem(self, word: str) -> str:
-        ...
 
 
 class DateStrategy(Protocol):
@@ -21,4 +17,9 @@ class DateStrategy(Protocol):
         ...
 
     def year(self, parts: tuple) -> int:
+        ...
+
+
+class DateParser(Protocol):
+    def parse(self, sentence: str) -> list[date]:
         ...

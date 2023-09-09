@@ -1,3 +1,4 @@
+from .complex_date_parser import ComplexDateParser
 from .parser import DateParser
 from .strategy import (DayMonthTextStrategy, DigitDateStrategy,
                        MonthTextStrategy)

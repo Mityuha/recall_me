@@ -4,7 +4,7 @@ from typing import Iterator
 
 import pytest
 from faker import Faker as FakerType
-from recall_me.date_parser import DigitDateParser
+from recall_me.date_parser import DateParser, DigitDateStrategy
 
 from .constants import DATES
 
@@ -73,7 +73,7 @@ def generate_any_date_sentences(dates: list[date]) -> Iterator[tuple[str, list[d
     generate_single_date_sentences(DATES),
 )
 def test_parse_single_date(sentence: str, expected: date) -> None:
-    results: list[date] = DigitDateParser().parse(sentence)
+    results: list[date] = DateParser(DigitDateStrategy()).parse(sentence)
     assert [expected] == results
 
 
@@ -82,5 +82,5 @@ def test_parse_single_date(sentence: str, expected: date) -> None:
     generate_any_date_sentences(DATES),
 )
 def test_parse_any_dates(sentence: str, expected: list[date]) -> None:
-    results: list[date] = DigitDateParser().parse(sentence)
+    results: list[date] = DateParser(DigitDateStrategy()).parse(sentence)
     assert set(expected) == set(results)

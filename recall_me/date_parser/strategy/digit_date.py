@@ -23,7 +23,7 @@ class DigitDateStrategy(PatternsMixin):
         )
 
     def __str__(self) -> str:
-        return "[DigitDateP]"
+        return "[DigitDate]"
 
     def prepare_sentence(self, sentence: str) -> str:
         return sentence.replace("\\", "/")

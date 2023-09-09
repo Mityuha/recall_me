@@ -3,8 +3,8 @@ from random import choice
 from typing import Iterator
 
 import pytest
-from recall_me.date_parser import TextDateParser
-from recall_me.date_parser.utils import MONTH_NUM_2_NAME as MONTHS
+from recall_me.date_parser import MONTH_NUM_2_NAME as MONTHS
+from recall_me.date_parser import DateParser, MonthTextStrategy
 
 from .constants import DATES, Faker
 
@@ -73,5 +73,5 @@ def generate_any_text_month_dates(
 
 @pytest.mark.parametrize("sentence, expected", generate_any_text_month_dates(DATES))
 def test_text_month_single_date(sentence: str, expected: list[date]) -> None:
-    results: list[date] = TextDateParser().parse(sentence)
+    results: list[date] = DateParser(MonthTextStrategy()).parse(sentence)
     assert set(expected) == set(results)

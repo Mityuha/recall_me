@@ -1,5 +1,5 @@
 import re
-from typing import Any, Final
+from typing import Any, Final, Sequence
 
 from nltk.stem.snowball import RussianStemmer  # type: ignore
 from recall_me.date_parser import DAY_NAME_2_NUM, MONTH_NAME_2_NUM
@@ -10,16 +10,19 @@ class SmartTitle:
         self,
         *,
         stemmer: Any = RussianStemmer(),
+        stop_words: Sequence[str] = tuple(DAY_NAME_2_NUM) + tuple(MONTH_NAME_2_NUM),
         max_words: int = 3,
     ) -> None:
         self.stemmer: Final[Any] = stemmer
         self.max_words: Final[int] = max_words
+        self.stop_words: Final[Sequence[str]] = stop_words
 
     def __call__(self, title: str) -> str:
         words: list[str] = title.split()
         title_words: list[str] = []
 
         matcher: re.Pattern = re.compile(r"[a-zа-я]")
+        print(words)
         for orig_word in words:
             if len(title_words) >= self.max_words:
                 break
@@ -29,10 +32,7 @@ class SmartTitle:
                 continue
 
             stem_word = self.stemmer.stem(word)
-            if stem_word in MONTH_NAME_2_NUM:
-                continue
-
-            if stem_word in DAY_NAME_2_NUM:
+            if stem_word in self.stop_words:
                 continue
 
             title_words.append(orig_word)

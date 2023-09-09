@@ -4,7 +4,7 @@ from typing import Any
 from recall_me.date_parser import ComplexDateParser
 
 
-def test_complex_date_parser_ok(
+def test_complex_date_parser_the_same_date(
     mocker: Any,
     faker: Any,
     next_notification: Any,
@@ -16,8 +16,9 @@ def test_complex_date_parser_ok(
     date2: date = faker.date_of_birth()
 
     parser = ComplexDateParser(
-        mocker.Mock(**{"parse.side_effect": [[date1], []]}),
-        mocker.Mock(**{"parse.side_effect": [[], [date2]]}),
+        mocker.Mock(**{"parse.side_effect": [[date1], [date2]]}),
+        mocker.Mock(**{"parse.side_effect": [[date1], [date2]]}),
+        mocker.Mock(**{"parse.side_effect": [[date1], [date2]]}),
     )
 
     text = f"{text1}\n{text2}"

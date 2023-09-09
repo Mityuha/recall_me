@@ -3,7 +3,16 @@ from typing import Final, Iterable
 
 from loguru import logger
 
+from .exceptions import AmbiguousParseResults
 from .interfaces import DateParser
+
+
+def next_notification(pdate: date) -> date:
+    d = pdate.replace(year=date.today().year)
+    if d > date.today():
+        return d
+
+    return d.replace(year=d.year + 1)
 
 
 class ComplexDateParser:
@@ -35,9 +44,27 @@ class ComplexDateParser:
 
                 for sentence, dates in results.items():
                     if sentence in a_results and set(dates) != set(a_results[sentence]):
-                        assert False  # <<<<
+                        year = date.today().year
+                        dates1 = {d.replace(year=year) for d in dates}
+                        dates2 = {d.replace(year=year) for d in a_results[sentence]}
+                        if dates1 != dates2:
+                            logger.error(
+                                f"Parsers {parser} and {a_parser} "
+                                "gave different results "
+                                f"for the same sentence: '{sentence}'. "
+                                f"'{parser}' results: {dates}. "
+                                f"'{a_parser}' results: {a_results[sentence]}"
+                            )
+                            raise AmbiguousParseResults(
+                                parser1=parser,
+                                parser2=a_parser,
+                                sentence=sentence,
+                            )
 
             for sentence, dates in results.items():
                 sentence_2_dates[sentence] = dates
 
-        return sentence_2_dates
+        return {
+            sentence: [next_notification(d) for d in dates]
+            for sentence, dates in sentence_2_dates.items()
+        }

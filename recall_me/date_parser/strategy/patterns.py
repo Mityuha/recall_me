@@ -19,5 +19,7 @@ class PatternsMixin:
             logger.debug(f"{self}: check against pattern {p_format}")
             yield pattern
 
+        self._pattern_parts = {}
+
     def _check_parts(self, parts: tuple) -> None:
         assert len(parts) == len(self._pattern_parts), (parts, self._pattern_parts)

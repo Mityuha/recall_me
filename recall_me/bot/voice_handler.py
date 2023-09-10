@@ -52,3 +52,5 @@ class VoiceHandler:
 
         events: Sequence[Event] = self.event_formatter.format_events(raw_events)
         logger.debug(f"{self}: events formatted: {events}")
+
+        await update.message.reply_text(f"Your events:\n{str(events)}")

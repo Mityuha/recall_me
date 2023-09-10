@@ -1,26 +1,29 @@
-import json
-from typing import Any, Final
+from typing import Final
 
 from recall_me.logging import logger
 from telegram import Update
 from telegram.ext import ContextTypes
 
+from .interfaces import Ogg2WavConverter, TextRecognizer
+
 
 class VoiceHandler:
     def __init__(
         self,
-        voice_2_text: Any,
         *,
-        ogg_2_wav: Any,
+        text_recognizer: TextRecognizer,
+        ogg_2_wav: Ogg2WavConverter,
     ) -> None:
-        self.voice_2_text: Final = voice_2_text
-        self.ogg_2_wav: Final = ogg_2_wav
+        self.text_recognizer: Final[TextRecognizer] = text_recognizer
+        self.ogg_2_wav: Final[Ogg2WavConverter] = ogg_2_wav
 
     def __str__(self) -> str:
         return "[VoiceHandler]"
 
     async def __call__(
-        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+        self,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
     ) -> None:
         if not update.message or not update.message.voice:
             return
@@ -34,14 +37,6 @@ class VoiceHandler:
 
         wav_bytes: bytes = self.ogg_2_wav.convert(ogg_bytes)
 
-        self.voice_2_text.AcceptWaveform(wav_bytes)
-        data: str = (
-            self.voice_2_text.Result()
-            or self.voice_2_text.PartialResult()
-            or self.voice_2_text.FinalResult()
-        )
+        text: str = self.text_recognizer.recognize(wav_bytes)
 
-        logger.debug(f"{self}: parsed data: {data}")
-        result: dict = json.loads(data)
-        text: str = result.get("text", "") or result.get("partial", "")
-        logger.debug(f"Parsed text: {text}")
+        logger.debug(f"{self}: text recognized: {text}")

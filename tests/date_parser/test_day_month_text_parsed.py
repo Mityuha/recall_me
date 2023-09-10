@@ -115,3 +115,9 @@ def test_text_daymonth_extra(sentence: str, expected: date) -> None:
     assert len(results) == 1
     assert results[0].month == expected.month
     assert results[0].day == expected.day
+
+
+@pytest.mark.parametrize("sentence", ("тридцать первого сентября едем в иск",))
+def test_text_daymonth_bad_day(sentence: str) -> None:
+    results: list[date] = DateParser(DayMonthTextStrategy()).parse(sentence)
+    assert not len(results)

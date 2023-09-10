@@ -11,6 +11,7 @@ __all__ = [
     "MONTH_NUM_2_NAME_STEM",
     "MONTH_NAME_2_NUM",
     "DAY_NAME_2_NUM",
+    "DAY_NUM_2_NAME",
 ]
 
 

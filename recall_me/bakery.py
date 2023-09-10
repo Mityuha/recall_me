@@ -3,8 +3,9 @@ from bakery import Bakery, Cake
 from .bot import TextHandler, VoiceHandler
 from .calendar import SmartTitle
 from .config import Settings
-from .date_parser import (ComplexDateParser, DateParser, DayMonthTextStrategy,
-                          DigitDateStrategy, EventFormatter, MonthTextStrategy)
+from .date_parser import (DAY_NAME_2_NUM, MONTH_NAME_2_NUM, ComplexDateParser,
+                          DateParser, DayMonthTextStrategy, DigitDateStrategy,
+                          EventFormatter, MonthTextStrategy)
 from .utils import Ogg2WavConverter, TextRecognizer, check_ffmpeg
 
 
@@ -36,6 +37,7 @@ class Container(Bakery):
 
     title_maker: SmartTitle = Cake(
         SmartTitle,
+        stop_words=tuple(DAY_NAME_2_NUM) + tuple(MONTH_NAME_2_NUM) + ("двадца",),
         max_words=settings.title_max_words,
     )
 

@@ -2,7 +2,6 @@ import re
 from typing import Any, Final, Sequence
 
 from nltk.stem.snowball import RussianStemmer  # type: ignore
-from recall_me.date_parser import DAY_NAME_2_NUM, MONTH_NAME_2_NUM
 
 
 class SmartTitle:
@@ -10,7 +9,7 @@ class SmartTitle:
         self,
         *,
         stemmer: Any = RussianStemmer(),
-        stop_words: Sequence[str] = tuple(DAY_NAME_2_NUM) + tuple(MONTH_NAME_2_NUM),
+        stop_words: Sequence[str] = tuple(),
         max_words: int = 3,
     ) -> None:
         self.stemmer: Final[Any] = stemmer

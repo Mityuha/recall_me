@@ -5,9 +5,7 @@ description = ""
 authors = ["mityuha <mit.makaroff@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.10"
-rutimeparser = "^1.1.1"
-dateparser = "^1.1.8"
+python = ">=3.10,<3.12"
 pymystem3 = "^0.2.0"
 pytest = "^7.4.0"
 Faker = "^19.3.0"
@@ -18,6 +16,7 @@ pydantic = "<2.0"
 ffmpeg-python = "^0.2.0"
 calendar-view = "^2.3.2"
 pillow = "9.5.0"
+fresh-bakery = "^0.2.1"
 
 [tool.poetry.dev-dependencies]
 black = "^23.7.0"

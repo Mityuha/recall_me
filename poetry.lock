@@ -282,29 +282,6 @@ files = [
 ]
 
 [[package]]
-name = "dateparser"
-version = "1.1.8"
-description = "Date parsing library designed to parse dates from HTML pages"
-category = "main"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "dateparser-1.1.8-py2.py3-none-any.whl", hash = "sha256:070b29b5bbf4b1ec2cd51c96ea040dc68a614de703910a91ad1abba18f9f379f"},
-    {file = "dateparser-1.1.8.tar.gz", hash = "sha256:86b8b7517efcc558f085a142cdb7620f0921543fcabdb538c8a4c4001d8178e3"},
-]
-
-[package.dependencies]
-python-dateutil = "*"
-pytz = "*"
-regex = "<2019.02.19 || >2019.02.19,<2021.8.27 || >2021.8.27"
-tzlocal = "*"
-
-[package.extras]
-calendars = ["convertdate", "hijri-converter"]
-fasttext = ["fasttext"]
-langdetect = ["langdetect"]
-
-[[package]]
 name = "exceptiongroup"
 version = "1.1.3"
 description = "Backport of PEP 654 (exception groups)"
@@ -351,6 +328,18 @@ future = "*"
 
 [package.extras]
 dev = ["Sphinx (==2.1.0)", "future (==0.17.1)", "numpy (==1.16.4)", "pytest (==4.6.1)", "pytest-mock (==1.10.4)", "tox (==3.12.1)"]
+
+[[package]]
+name = "fresh-bakery"
+version = "0.2.1"
+description = "Bake your dependencies stupidly simple!"
+category = "main"
+optional = false
+python-versions = ">=3.6.2,<3.12"
+files = [
+    {file = "fresh_bakery-0.2.1-py3-none-any.whl", hash = "sha256:a26479da5673c12eb76ca7513bff2f3b323a418f45ac9bf79eaa2545502e2b9c"},
+    {file = "fresh_bakery-0.2.1.tar.gz", hash = "sha256:afda28f2112a1d707075fc67c02b88aad1aaa13c4d97c2cf85a4e14ca6c816aa"},
+]
 
 [[package]]
 name = "future"
@@ -895,18 +884,6 @@ socks = ["httpx[socks]"]
 webhooks = ["tornado (>=6.2,<7.0)"]
 
 [[package]]
-name = "pytz"
-version = "2023.3.post1"
-description = "World timezone definitions, modern and historical"
-category = "main"
-optional = false
-python-versions = "*"
-files = [
-    {file = "pytz-2023.3.post1-py2.py3-none-any.whl", hash = "sha256:ce42d816b81b68506614c11e8937d3aa9e41007ceb50bfdcb0749b921bf646c7"},
-    {file = "pytz-2023.3.post1.tar.gz", hash = "sha256:7b4fddbeb94a1eba4b557da24f19fdf9db575192544270a9101d8509f9f43d7b"},
-]
-
-[[package]]
 name = "regex"
 version = "2023.8.8"
 description = "Alternative regular expression module, to replace re."
@@ -1054,21 +1031,6 @@ files = [
 ]
 
 [[package]]
-name = "rutimeparser"
-version = "1.1.1"
-description = "Recognize date and time in russian text."
-category = "main"
-optional = false
-python-versions = ">=2.7"
-files = [
-    {file = "rutimeparser-1.1.1-py3-none-any.whl", hash = "sha256:0b436e36cf1d236984d6a4b392fa311a8adffe797251ed2af5808ec4d3bdd43c"},
-    {file = "rutimeparser-1.1.1.tar.gz", hash = "sha256:df7f2c32ec8dddb8cf0543d9b97220a3b48d06053495cc7553dcbeaa2d580d79"},
-]
-
-[package.dependencies]
-pytz = "*"
-
-[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -1147,36 +1109,6 @@ files = [
     {file = "typing_extensions-4.7.1-py3-none-any.whl", hash = "sha256:440d5dd3af93b060174bf433bccd69b0babc3b15b1a8dca43789fd7f61514b36"},
     {file = "typing_extensions-4.7.1.tar.gz", hash = "sha256:b75ddc264f0ba5615db7ba217daeb99701ad295353c45f9e95963337ceeeffb2"},
 ]
-
-[[package]]
-name = "tzdata"
-version = "2023.3"
-description = "Provider of IANA time zone data"
-category = "main"
-optional = false
-python-versions = ">=2"
-files = [
-    {file = "tzdata-2023.3-py2.py3-none-any.whl", hash = "sha256:7e65763eef3120314099b6939b5546db7adce1e7d6f2e179e3df563c70511eda"},
-    {file = "tzdata-2023.3.tar.gz", hash = "sha256:11ef1e08e54acb0d4f95bdb1be05da659673de4acbd21bf9c69e94cc5e907a3a"},
-]
-
-[[package]]
-name = "tzlocal"
-version = "5.0.1"
-description = "tzinfo object for the local timezone"
-category = "main"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "tzlocal-5.0.1-py3-none-any.whl", hash = "sha256:f3596e180296aaf2dbd97d124fe76ae3a0e3d32b258447de7b939b3fd4be992f"},
-    {file = "tzlocal-5.0.1.tar.gz", hash = "sha256:46eb99ad4bdb71f3f72b7d24f4267753e240944ecfc16f25d2719ba89827a803"},
-]
-
-[package.dependencies]
-tzdata = {version = "*", markers = "platform_system == \"Windows\""}
-
-[package.extras]
-devenv = ["black", "check-manifest", "flake8", "pyroma", "pytest (>=4.3)", "pytest-cov", "pytest-mock (>=3.3)", "zest.releaser"]
 
 [[package]]
 name = "urllib3"
@@ -1301,5 +1233,5 @@ files = [
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.10"
-content-hash = "9d385c192e07e73e900c027907e430da6f6020f0e74e8063aec15b841ec61650"
+python-versions = ">=3.10,<3.12"
+content-hash = "06e24281640630720261e9bffd80610518aad9e1f447eebcbc70f30be23b617f"

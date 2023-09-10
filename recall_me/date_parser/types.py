@@ -7,5 +7,5 @@ class Event:
     title: str
     description: str
     edate: date
-    start_hour: int = 10
+    start_hour: int = -1
     duration: int = 2

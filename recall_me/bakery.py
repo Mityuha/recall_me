@@ -2,6 +2,8 @@ from bakery import Bakery, Cake
 
 from .bot import TextHandler, VoiceHandler
 from .config import Settings
+from .date_parser import (ComplexDateParser, DateParser, DayMonthTextStrategy,
+                          DigitDateStrategy, MonthTextStrategy)
 from .utils import Ogg2WavConverter, TextRecognizer, check_ffmpeg
 
 
@@ -20,10 +22,25 @@ class Container(Bakery):
         framerate,
     )
 
+    digit_date_strategy: DigitDateStrategy = Cake(DigitDateStrategy)
+    month_text_strategy: MonthTextStrategy = Cake(MonthTextStrategy)
+    day_month_text_strategy: DayMonthTextStrategy = Cake(DayMonthTextStrategy)
+
+    date_parser: ComplexDateParser = Cake(
+        ComplexDateParser,
+        Cake(DateParser, digit_date_strategy),
+        Cake(DateParser, month_text_strategy),
+        Cake(DateParser, day_month_text_strategy),
+    )
+
+    event_formatter: EventFormatter = Cake(EventFormatter)
+
     voice_handler: VoiceHandler = Cake(
         VoiceHandler,
         text_recognizer=text_recognizer,
         ogg_2_wav=ogg_2_wav,
+        date_parser=date_parser,
+        event_formatter=event_formatter,
     )
 
     text_handler: TextHandler = Cake(TextHandler)

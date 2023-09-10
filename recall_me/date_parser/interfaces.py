@@ -23,3 +23,8 @@ class DateStrategy(Protocol):
 class DateParser(Protocol):
     def parse(self, sentence: str) -> list[date]:
         ...
+
+
+class TitleMaker(Protocol):
+    def __call__(self, title: str) -> str:
+        ...

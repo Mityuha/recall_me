@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 from typing import Final
 from zipfile import ZipFile
 
-from loguru import logger
+from recall_me.logging import logger
 from vosk import KaldiRecognizer, Model  # type: ignore
 
 
@@ -30,5 +30,5 @@ class TextRecognizer:
         logger.debug(f"{self}: parsed data: {data}")
         result: dict = json.loads(data)
         text: str = result.get("text", "") or result.get("partial", "")
-        logger.debug(f"Parsed text: {text}")
+        logger.debug(f"{self}: parsed text: {text}")
         return text

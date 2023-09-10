@@ -1,4 +1,5 @@
-from typing import Protocol
+from datetime import date
+from typing import Iterable, Protocol
 
 
 class Ogg2WavConverter(Protocol):
@@ -8,4 +9,25 @@ class Ogg2WavConverter(Protocol):
 
 class TextRecognizer(Protocol):
     def recognize(self, wav_bytes: bytes) -> str:
+        ...
+
+
+class DateParser(Protocol):
+    def parse(self, text: str) -> dict[str, list[date]]:
+        ...
+
+
+class Event(Protocol):
+    title: str
+    description: str
+    edate: date
+    start_hour: int
+    duration: int
+
+
+class EventFormatter(Protocol):
+    def format_events(
+        self,
+        events: dict[str, Iterable[date]],
+    ) -> Iterable[Event]:
         ...

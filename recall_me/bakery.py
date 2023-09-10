@@ -1,9 +1,10 @@
 from bakery import Bakery, Cake
 
 from .bot import TextHandler, VoiceHandler
+from .calendar import SmartTitle
 from .config import Settings
 from .date_parser import (ComplexDateParser, DateParser, DayMonthTextStrategy,
-                          DigitDateStrategy, MonthTextStrategy)
+                          DigitDateStrategy, EventFormatter, MonthTextStrategy)
 from .utils import Ogg2WavConverter, TextRecognizer, check_ffmpeg
 
 
@@ -33,7 +34,12 @@ class Container(Bakery):
         Cake(DateParser, day_month_text_strategy),
     )
 
-    event_formatter: EventFormatter = Cake(EventFormatter)
+    title_maker: SmartTitle = Cake(
+        SmartTitle,
+        max_words=settings.title_max_words,
+    )
+
+    event_formatter: EventFormatter = Cake(EventFormatter, title_maker)
 
     voice_handler: VoiceHandler = Cake(
         VoiceHandler,

@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Iterable, Protocol
+from typing import Protocol, Sequence
 
 
 class Ogg2WavConverter(Protocol):
@@ -28,6 +28,6 @@ class Event(Protocol):
 class EventFormatter(Protocol):
     def format_events(
         self,
-        events: dict[str, Iterable[date]],
-    ) -> Iterable[Event]:
+        events: dict[str, list[date]],
+    ) -> Sequence[Event]:
         ...

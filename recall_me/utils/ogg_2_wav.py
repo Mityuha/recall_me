@@ -2,7 +2,7 @@ import wave
 from io import BytesIO
 from typing import Callable, Final
 
-import ffmpeg
+import ffmpeg  # type: ignore
 from recall_me.logging import logger
 
 

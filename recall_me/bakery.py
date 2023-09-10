@@ -51,4 +51,8 @@ class Container(Bakery):
         event_formatter=event_formatter,
     )
 
-    text_handler: TextHandler = Cake(TextHandler)
+    text_handler: TextHandler = Cake(
+        TextHandler,
+        date_parser=date_parser,
+        event_formatter=event_formatter,
+    )

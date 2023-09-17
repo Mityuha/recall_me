@@ -1,8 +1,7 @@
 from datetime import date
 from typing import Final, Iterable
 
-from loguru import logger
-
+from ..logging import logger
 from .exceptions import AmbiguousParseResults
 from .interfaces import DateParser
 

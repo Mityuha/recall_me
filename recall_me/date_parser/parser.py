@@ -2,8 +2,7 @@ import re
 from datetime import date
 from typing import Final
 
-from loguru import logger
-
+from ..logging import logger
 from .interfaces import DateStrategy
 
 

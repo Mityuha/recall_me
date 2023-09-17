@@ -8,7 +8,7 @@ from telegram.ext import ContextTypes
 from .interfaces import DateParser, Event, EventFormatter
 
 
-class TextHandler:
+class TextEvents:
     def __init__(
         self,
         *,
@@ -19,13 +19,16 @@ class TextHandler:
         self.event_formatter: Final[EventFormatter] = event_formatter
 
     def __str__(self) -> str:
-        return "[TextHandler]"
+        return "[TextEvents]"
 
     async def __call__(
-        self, update: Update, context: ContextTypes.DEFAULT_TYPE
-    ) -> None:
+        self,
+        *,
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
+    ) -> Sequence[Event]:
         if not update.message or not update.message.text:
-            return
+            return []
 
         text = update.message.text
         logger.debug(f"{self}: message received: {text}")
@@ -36,4 +39,4 @@ class TextHandler:
         events: Sequence[Event] = self.event_formatter.format_events(raw_events)
         logger.debug(f"{self}: events formatted: {events}")
 
-        await update.message.reply_text(f"Your events:\n{str(events)}")
+        return events

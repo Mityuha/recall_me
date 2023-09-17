@@ -1,7 +1,7 @@
 import re
 from typing import Final, Iterable
 
-from loguru import logger
+from recall_me.logging import logger
 
 
 class PatternsMixin:

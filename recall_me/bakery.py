@@ -1,6 +1,6 @@
 from bakery import Bakery, Cake
 
-from .bot import TextHandler, VoiceHandler
+from .bot import Handler, TextEvents, VoiceEvents
 from .calendar import SmartTitle
 from .config import Settings
 from .date_parser import (DAY_NAME_2_NUM, MONTH_NAME_2_NUM, ComplexDateParser,
@@ -43,16 +43,27 @@ class Container(Bakery):
 
     event_formatter: EventFormatter = Cake(EventFormatter, title_maker)
 
-    voice_handler: VoiceHandler = Cake(
-        VoiceHandler,
+    voice_events: VoiceEvents = Cake(
+        VoiceEvents,
         text_recognizer=text_recognizer,
         ogg_2_wav=ogg_2_wav,
         date_parser=date_parser,
         event_formatter=event_formatter,
     )
 
-    text_handler: TextHandler = Cake(
-        TextHandler,
+    text_events: TextEvents = Cake(
+        TextEvents,
         date_parser=date_parser,
         event_formatter=event_formatter,
+    )
+
+    text_handler: Handler = Cake(
+        Handler,
+        text_events,
+        description="TextHandler",
+    )
+    voice_handler: Handler = Cake(
+        Handler,
+        voice_events,
+        description="VoiceHandler",
     )

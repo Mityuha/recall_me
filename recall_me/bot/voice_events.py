@@ -9,7 +9,7 @@ from .interfaces import (DateParser, Event, EventFormatter, Ogg2WavConverter,
                          TextRecognizer)
 
 
-class VoiceHandler:
+class VoiceEvents:
     def __init__(
         self,
         *,
@@ -24,15 +24,16 @@ class VoiceHandler:
         self.event_formatter: Final[EventFormatter] = event_formatter
 
     def __str__(self) -> str:
-        return "[VoiceHandler]"
+        return "[VoiceEvents]"
 
     async def __call__(
         self,
+        *,
         update: Update,
         context: ContextTypes.DEFAULT_TYPE,
-    ) -> None:
+    ) -> Sequence[Event]:
         if not update.message or not update.message.voice:
-            return
+            return []
 
         # get basic info about the voice note file and prepare it for downloading
         new_file = await context.bot.get_file(update.message.voice.file_id)
@@ -52,5 +53,4 @@ class VoiceHandler:
 
         events: Sequence[Event] = self.event_formatter.format_events(raw_events)
         logger.debug(f"{self}: events formatted: {events}")
-
-        await update.message.reply_text(f"Your events:\n{str(events)}")
+        return events

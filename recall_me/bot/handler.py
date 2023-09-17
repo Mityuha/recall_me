@@ -3,7 +3,7 @@ from typing import Final, Sequence
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from .interfaces import Event, EventsGetter
+from .interfaces import Event, EventsConfirmation, EventsGetter
 
 
 class Handler:
@@ -11,9 +11,11 @@ class Handler:
         self,
         events_getter: EventsGetter,
         *,
+        events_confirmation: EventsConfirmation,
         description: str = "Handler",
     ) -> None:
         self.event_getter: Final[EventsGetter] = events_getter
+        self.events_confirmation: Final[EventsConfirmation] = events_confirmation
         self._description: Final[str] = description
 
     def __str__(self) -> str:
@@ -32,4 +34,7 @@ class Handler:
             context=context,
         )
 
-        await update.message.reply_text(f"Your events:\n{str(events)}")
+        await self.events_confirmation.send_confirmation(
+            events,
+            message=update.message,
+        )

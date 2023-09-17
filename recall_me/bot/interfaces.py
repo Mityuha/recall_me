@@ -36,3 +36,13 @@ class EventFormatter(Protocol):
 class EventsGetter(Protocol):
     async def __call__(self, *, update: Any, context: Any) -> Sequence[Event]:
         ...
+
+
+class Event2Text(Protocol):
+    def __call__(self, event: Event) -> str:
+        ...
+
+
+class EventsConfirmation(Protocol):
+    def __call__(self, events: Sequence[Event], *, message: Any) -> None:
+        ...

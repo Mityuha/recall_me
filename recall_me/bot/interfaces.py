@@ -46,3 +46,26 @@ class Event2Text(Protocol):
 class EventsConfirmation(Protocol):
     async def send_confirmation(self, events: Sequence[Event], *, message: Any) -> bool:
         ...
+
+
+class EventSaver(Protocol):
+    async def save_event(
+        self,
+        *,
+        title: str,
+        description: str,
+        event_day: int,
+        event_month: int,
+        voice_id: str | None,
+        source_text: str | None,
+        author_id: str,
+        duration: int = 2,
+        start_hour: int = -1,
+        notify_before_days: int = 7,
+    ) -> None:
+        ...
+
+
+class TextEditor(Protocol):
+    async def edit_message_text(self, text: str) -> Any:
+        ...

@@ -10,8 +10,8 @@ event_table = Table(
     Column("description", String(128), nullable=False),
     Column("event_day", Integer, nullable=False),
     Column("event_month", Integer, nullable=False),
-    Column("voice_id", String(64), nullable=True),
-    Column("source_text", String(128), nullable=True),
+    Column("voice_id", String(128), nullable=True),
+    Column("source_text", String(256), nullable=True),
     Column("author_id", String(64), nullable=False),
 )
 

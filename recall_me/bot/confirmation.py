@@ -39,7 +39,7 @@ class EventsConfirmation:
         events: Sequence[Event],
         *,
         message: Message,
-    ) -> bool:
+    ) -> tuple[bool, CallbackQuery]:
         callback_id: str = str(uuid4())
         yes_callback: str = f"{callback_id}-{Confirmation.YES.value}"
         no_callback: str = f"{callback_id}-{Confirmation.NO.value}"
@@ -88,13 +88,11 @@ class EventsConfirmation:
             self.channels.pop(callback_id)
 
         if not data:
-            return False
+            return False, query
 
         confirmation: Confirmation = Confirmation(data)
 
         if confirmation == Confirmation.NO:
-            await query.edit_message_text(text="Хорошо. Попробуйте еще раз.")
-            return False
+            return False, query
 
-        await query.edit_message_text(text="Сохранено")
-        return True
+        return True, query

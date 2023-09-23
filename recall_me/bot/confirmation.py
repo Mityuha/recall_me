@@ -1,4 +1,8 @@
+from asyncio import Queue
+from asyncio import TimeoutError as AioTimeoutError
+from asyncio import wait_for
 from collections import namedtuple
+from enum import Enum
 from typing import Final, Sequence
 from uuid import uuid4
 
@@ -12,12 +16,19 @@ from .interfaces import Event, Event2Text
 Event2Save = namedtuple("Event2Save", "events text voice_id")
 
 
+class Confirmation(Enum):
+    NO = "0"
+    YES = "1"
+
+
 class EventsConfirmation:
     def __init__(self, event_formatter: Event2Text) -> None:
         self.event_formatter: Final[Event2Text] = event_formatter
-        self.yes_2_events: Final[dict[str, Sequence[Event]]] = {}
-        self.no_2_events: Final[dict[str, Sequence[Event]]] = {}
-        self.yes_no_binging: Final[dict[str, str]] = {}
+        # self.yes_2_events: Final[dict[str, Sequence[Event]]] = {}
+        # self.no_2_events: Final[dict[str, Sequence[Event]]] = {}
+        # self.yes_no_binging: Final[dict[str, str]] = {}
+        self.channels: Final[dict[str, Queue]] = {}
+        self.timeout: Final[int] = 5 * 60
 
     def __str__(self) -> str:
         return "[Confirmation]"
@@ -27,9 +38,11 @@ class EventsConfirmation:
         events: Sequence[Event],
         *,
         message: Message,
-    ) -> None:
-        yes_callback: str = str(uuid4())
-        no_callback: str = str(uuid4())
+    ) -> bool:
+        callback_id: str = str(uuid4())
+        yes_callback: str = f"{callback_id}-{Confirmation.YES.value}"
+        no_callback: str = f"{callback_id}-{Confirmation.NO.value}"
+
         keyboard = [
             [
                 InlineKeyboardButton("Да", callback_data=yes_callback),
@@ -37,16 +50,8 @@ class EventsConfirmation:
             ],
         ]
 
-        event_2_save = Event2Save(
-            events=events,
-            text=message.text or "",
-            voice_id=message.voice.file_id if message.voice else None,
-        )
-
-        self.yes_2_events[yes_callback] = event_2_save
-        self.no_2_events[no_callback] = event_2_save
-        self.yes_no_binging[yes_callback] = no_callback
-        self.yes_no_binging[no_callback] = yes_callback
+        channel: Queue = Queue()
+        self.channels[callback_id] = channel
 
         events_text: str = "\n".join(self.event_formatter(event) for event in events)
 
@@ -68,6 +73,21 @@ class EventsConfirmation:
             parse_mode="HTML",
         )
 
+        try:
+            confirmation: Confirmation = await wait_for(channel.get(), self.timeout)
+        except AioTimeoutError:
+            logger.warning(
+                f"{self}: User '{message.chat.username}' "
+                f"didn't confirm events for {self.timeout} seconds"
+            )
+            confirmation = Confirmation.NO
+        finally:
+            self.channels.pop(callback_id)
+
+        if confirmation == Confirmation.NO:
+            return False
+        return True
+
     async def button(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         if not update.callback_query:
             logger.info(f"{self}: update received, but no callback_query found")
@@ -79,26 +99,24 @@ class EventsConfirmation:
             await query.delete_message()
             return
 
+        logger.debug(
+            f"{self}: Query answer received: '{query.data}' "
+            f"from user {query.from_user.username}"
+        )
         await query.answer()
 
-        answer: str = query.data
-        if answer not in self.yes_no_binging:
+        callback_id, answer = query.data.rsplit("-", 1)
+        if callback_id not in self.channels:
             await query.edit_message_text(
-                text="Похоже, что сообщение старое. Давай по-новой"
+                text="Похоже, что сообщение старое. Попробуйте еще раз"
             )
             return
 
-        if answer in self.yes_2_events:
-            logger.debug(f"{self}: {query.from_user.username} clicked yes")
-            await query.edit_message_text(text="Сохранено")
-            no_answer = self.yes_no_binging.pop(answer)
-            self.yes_no_binging.pop(no_answer)
-            self.yes_2_events.pop(answer)
-            self.no_2_events.pop(no_answer)
-        else:
-            logger.debug(f"{self}: {query.from_user.username} clicked no")
+        confirmation: Confirmation = Confirmation(answer)
+        logger.debug(f"{self}: {query.from_user.username} clicked {confirmation}")
+        if confirmation == Confirmation.NO:
             await query.edit_message_text(text="Хорошо. Попробуйте еще раз.")
-            yes_answer = self.yes_no_binging.pop(answer)
-            self.yes_no_binging.pop(yes_answer)
-            self.yes_2_events.pop(yes_answer)
-            self.no_2_events.pop(answer)
+        else:
+            await query.edit_message_text(text="Сохранено")
+
+        await self.channels[callback_id].put(confirmation)

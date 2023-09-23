@@ -44,5 +44,5 @@ class Event2Text(Protocol):
 
 
 class EventsConfirmation(Protocol):
-    def __call__(self, events: Sequence[Event], *, message: Any) -> None:
+    async def send_confirmation(self, events: Sequence[Event], *, message: Any) -> bool:
         ...

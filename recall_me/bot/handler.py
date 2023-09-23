@@ -1,6 +1,8 @@
+from asyncio import create_task, sleep
 from typing import Final, Sequence
 
-from telegram import Update
+from recall_me.logging import logger
+from telegram import Message, Update
 from telegram.ext import ContextTypes
 
 from .interfaces import Event, EventsConfirmation, EventsGetter
@@ -21,6 +23,26 @@ class Handler:
     def __str__(self) -> str:
         return "[self._description]"
 
+    async def process_in_background(
+        self,
+        *,
+        message: Message,
+        events: Sequence[Event],
+    ) -> None:
+        is_confirmed: bool = await self.events_confirmation.send_confirmation(
+            events,
+            message=message,
+        )
+
+        if not is_confirmed:
+            logger.info(f"{self}: User {message.chat.username} declined events saving.")
+            return
+
+        logger.info(
+            f"{self}: User {message.chat.username} "
+            "confirmed events saving. Save events."
+        )
+
     async def __call__(
         self,
         update: Update,
@@ -34,7 +56,10 @@ class Handler:
             context=context,
         )
 
-        await self.events_confirmation.send_confirmation(
-            events,
-            message=update.message,
+        create_task(
+            self.process_in_background(
+                message=update.message,
+                events=events,
+            )
         )
+        await sleep(0)

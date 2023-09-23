@@ -26,8 +26,8 @@ def upgrade() -> None:
         sa.Column("description", sa.String(length=128), nullable=False),
         sa.Column("event_day", sa.Integer(), nullable=False),
         sa.Column("event_month", sa.Integer(), nullable=False),
-        sa.Column("voice_id", sa.String(length=64), nullable=True),
-        sa.Column("source_text", sa.String(length=128), nullable=True),
+        sa.Column("voice_id", sa.String(length=128), nullable=True),
+        sa.Column("source_text", sa.String(length=256), nullable=True),
         sa.Column("author_id", sa.String(length=64), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )

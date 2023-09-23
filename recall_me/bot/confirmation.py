@@ -6,9 +6,8 @@ from enum import Enum
 from typing import Final, Sequence
 from uuid import uuid4
 
-from telegram import (InlineKeyboardButton, InlineKeyboardMarkup, Message,
-                      Update)
-from telegram.ext import ContextTypes
+from telegram import (CallbackQuery, InlineKeyboardButton,
+                      InlineKeyboardMarkup, Message)
 
 from ..logging import logger
 from .interfaces import Event, Event2Text
@@ -22,13 +21,15 @@ class Confirmation(Enum):
 
 
 class EventsConfirmation:
-    def __init__(self, event_formatter: Event2Text) -> None:
+    def __init__(
+        self,
+        channels: dict[str, Queue],
+        event_formatter: Event2Text,
+        timeout: int = 5 * 60,
+    ) -> None:
         self.event_formatter: Final[Event2Text] = event_formatter
-        # self.yes_2_events: Final[dict[str, Sequence[Event]]] = {}
-        # self.no_2_events: Final[dict[str, Sequence[Event]]] = {}
-        # self.yes_no_binging: Final[dict[str, str]] = {}
-        self.channels: Final[dict[str, Queue]] = {}
-        self.timeout: Final[int] = 5 * 60
+        self.channels: Final[dict[str, Queue]] = channels
+        self.timeout: Final[int] = timeout
 
     def __str__(self) -> str:
         return "[Confirmation]"
@@ -73,50 +74,27 @@ class EventsConfirmation:
             parse_mode="HTML",
         )
 
+        data: str = ""
+        query: CallbackQuery
+
         try:
-            confirmation: Confirmation = await wait_for(channel.get(), self.timeout)
+            data, query = await wait_for(channel.get(), self.timeout)
         except AioTimeoutError:
             logger.warning(
                 f"{self}: User '{message.chat.username}' "
                 f"didn't confirm events for {self.timeout} seconds"
             )
-            confirmation = Confirmation.NO
         finally:
             self.channels.pop(callback_id)
 
-        if confirmation == Confirmation.NO:
+        if not data:
             return False
-        return True
 
-    async def button(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-        if not update.callback_query:
-            logger.info(f"{self}: update received, but no callback_query found")
-            return
+        confirmation: Confirmation = Confirmation(data)
 
-        query = update.callback_query
-        if not query.data:
-            logger.info(f"{self}: no callback query data found.")
-            await query.delete_message()
-            return
-
-        logger.debug(
-            f"{self}: Query answer received: '{query.data}' "
-            f"from user {query.from_user.username}"
-        )
-        await query.answer()
-
-        callback_id, answer = query.data.rsplit("-", 1)
-        if callback_id not in self.channels:
-            await query.edit_message_text(
-                text="Похоже, что сообщение старое. Попробуйте еще раз"
-            )
-            return
-
-        confirmation: Confirmation = Confirmation(answer)
-        logger.debug(f"{self}: {query.from_user.username} clicked {confirmation}")
         if confirmation == Confirmation.NO:
             await query.edit_message_text(text="Хорошо. Попробуйте еще раз.")
-        else:
-            await query.edit_message_text(text="Сохранено")
+            return False
 
-        await self.channels[callback_id].put(confirmation)
+        await query.edit_message_text(text="Сохранено")
+        return True

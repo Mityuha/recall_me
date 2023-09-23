@@ -1,3 +1,4 @@
+from .callback_query import CallbackQuery
 from .confirmation import EventsConfirmation
 from .handler import Handler
 from .text_events import TextEvents

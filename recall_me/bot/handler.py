@@ -21,7 +21,7 @@ class Handler:
         self._description: Final[str] = description
 
     def __str__(self) -> str:
-        return "[self._description]"
+        return f"[{self._description}]"
 
     async def process_in_background(
         self,

@@ -1,7 +1,9 @@
+from asyncio import Queue
+
 from bakery import Bakery, Cake
 
-from .bot import (Event2Text, EventsConfirmation, Handler, TextEvents,
-                  VoiceEvents)
+from .bot import (CallbackQuery, Event2Text, EventsConfirmation, Handler,
+                  TextEvents, VoiceEvents)
 from .calendar import SmartTitle
 from .config import Settings
 from .date_parser import (DAY_NAME_2_NUM, MONTH_NAME_2_NUM, ComplexDateParser,
@@ -58,7 +60,14 @@ class Container(Bakery):
         event_formatter=event_formatter,
     )
     event_2_text: Event2Text = Cake(Event2Text)
-    events_confirmation: EventsConfirmation = Cake(EventsConfirmation, event_2_text)
+    channels: dict[str, Queue] = Cake({})
+    events_confirmation: EventsConfirmation = Cake(
+        EventsConfirmation,
+        channels=channels,
+        event_formatter=event_2_text,
+    )
+
+    callback_query: CallbackQuery = Cake(CallbackQuery, channels)
 
     text_handler: Handler = Cake(
         Handler,

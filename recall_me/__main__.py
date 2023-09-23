@@ -22,7 +22,7 @@ def main() -> None:
         MessageHandler(filters.VOICE & ~filters.COMMAND, bakery.voice_handler)
     )
 
-    application.add_handler(CallbackQueryHandler(bakery.events_confirmation.button))
+    application.add_handler(CallbackQueryHandler(bakery.callback_query.handle))
 
     # Run the bot until the user presses Ctrl-C
     try:

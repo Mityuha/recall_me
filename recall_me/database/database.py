@@ -2,6 +2,7 @@ import re
 from typing import Any, Final, Mapping, Sequence
 
 from psycopg import AsyncConnection
+from psycopg.rows import dict_row
 
 
 class Database:
@@ -31,3 +32,27 @@ class Database:
             return res[0]
 
         return res
+
+    async def fetch_all(self, query: str, values: Mapping[str, Any]) -> Any:
+        async with self.conn.cursor(row_factory=dict_row) as cur:
+            cur = await self._execute(cur, query, values)
+            res = await cur.fetchall()
+
+        if not res:
+            return []
+
+        return res
+
+    async def fetch_one(self, query: str, values: Mapping[str, Any]) -> Any:
+        async with self.conn.cursor(row_factory=dict_row) as cur:
+            cur = await self._execute(cur, query, values)
+            res = await cur.fetchone()
+
+        if not res:
+            return None
+
+        return res
+
+    async def execute(self, query: str, values: Mapping[str, Any]) -> None:
+        async with self.conn.cursor() as cur:
+            await self._execute(cur, query, values)

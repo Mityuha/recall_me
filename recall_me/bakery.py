@@ -7,9 +7,10 @@ from bakery import Bakery, Cake
 
 from .bot import (CallbackQuery, Event2Text, EventsConfirmation, Handler,
                   TextEvents, VoiceEvents)
+from .bot.events_cmd import CallbackHandler, EventsCommand
 from .calendar import SmartTitle
 from .config import Settings
-from .database import Database, SaveEvent
+from .database import Database, DeleteEvent, EventInfo, SaveEvent, UserEvents
 from .date_parser import (DAY_NAME_2_NUM, MONTH_NAME_2_NUM, ComplexDateParser,
                           DateParser, DayMonthTextStrategy, DigitDateStrategy,
                           EventFormatter, MonthTextStrategy)
@@ -100,4 +101,22 @@ class Container(Bakery):
         events_confirmation=events_confirmation,
         event_saver=event_saver,
         description="VoiceHandler",
+    )
+
+    event_info_getter: EventInfo = Cake(EventInfo, database)
+    event_deleter: DeleteEvent = Cake(DeleteEvent, database)
+    user_events_getter: UserEvents = Cake(UserEvents, database)
+
+    events_screen: CallbackHandler = Cake(
+        CallbackHandler,
+        channels=channels,
+        event_info_getter=event_info_getter,
+        event_deleter=event_deleter,
+    )
+
+    cmd_event_handler: EventsCommand = Cake(
+        EventsCommand,
+        channels,
+        events_getter=user_events_getter,
+        events_screen=events_screen,
     )

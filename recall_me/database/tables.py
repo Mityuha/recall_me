@@ -19,7 +19,12 @@ config_table = Table(
     "event_config",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("event_id", Integer, ForeignKey("event.id"), nullable=False),
+    Column(
+        "event_id",
+        Integer,
+        ForeignKey("event.id", ondelete="CASCADE"),
+        nullable=False,
+    ),
     Column("duration", Integer, nullable=False, server_default="2"),
     Column("start_hour", Integer, nullable=False, server_default="-1"),
     Column("notify_before_days", Integer, nullable=False, server_default="7"),

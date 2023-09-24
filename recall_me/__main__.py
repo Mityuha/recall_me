@@ -1,8 +1,8 @@
 from asyncio import new_event_loop
 
 from telegram import Update
-from telegram.ext import (Application, CallbackQueryHandler, MessageHandler,
-                          filters)
+from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
+                          MessageHandler, filters)
 
 from .bakery import Container
 
@@ -23,6 +23,7 @@ def main() -> None:
     )
 
     application.add_handler(CallbackQueryHandler(bakery.callback_query.handle))
+    application.add_handler(CommandHandler("events", bakery.cmd_event_handler))
 
     # Run the bot until the user presses Ctrl-C
     try:

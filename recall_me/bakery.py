@@ -1,7 +1,6 @@
 from asyncio import Queue
 
-from psycopg import AsyncConnection
-from psycopg.rows import tuple_row
+from databases import Database
 
 from bakery import Bakery, Cake
 
@@ -10,7 +9,7 @@ from .bot import (CallbackQuery, Event2Text, EventsConfirmation, Handler,
 from .bot.events_cmd import CallbackHandler, EventsCommand
 from .calendar import SmartTitle
 from .config import Settings
-from .database import Database, DeleteEvent, EventInfo, SaveEvent, UserEvents
+from .database import DeleteEvent, EventInfo, SaveEvent, UserEvents
 from .date_parser import (DAY_NAME_2_NUM, MONTH_NAME_2_NUM, ComplexDateParser,
                           DateParser, DayMonthTextStrategy, DigitDateStrategy,
                           EventFormatter, MonthTextStrategy)
@@ -76,16 +75,7 @@ class Container(Bakery):
 
     callback_query: CallbackQuery = Cake(CallbackQuery, channels)
 
-    # database: Database = Cake(Cake(Database, settings.postgres_dsn))
-    connection: AsyncConnection = Cake(
-        Cake(
-            AsyncConnection.connect,
-            settings.postgres_dsn,
-            row_factory=tuple_row,  # type: ignore
-            autocommit=True,
-        )
-    )
-    database: Database = Cake(Database, connection)
+    database: Database = Cake(Cake(Database, settings.postgres_dsn))
     event_saver: SaveEvent = Cake(SaveEvent, database)
 
     text_handler: Handler = Cake(

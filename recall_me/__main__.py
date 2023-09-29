@@ -1,16 +1,19 @@
-from asyncio import new_event_loop
+from asyncio import new_event_loop, set_event_loop
 
 from telegram import Update
+from telegram.error import TimedOut
 from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
                           MessageHandler, filters)
 
 from .bakery import Container
+from .logging import logger
 
 
 def main() -> None:
     # Create the Application and pass it your bot's token.
 
     loop = new_event_loop()
+    set_event_loop(loop)
     bakery: Container = loop.run_until_complete(Container.aopen())
 
     application = Application.builder().token(bakery.settings.bot_token).build()
@@ -27,9 +30,15 @@ def main() -> None:
 
     # Run the bot until the user presses Ctrl-C
     try:
-        application.run_polling(allowed_updates=Update.ALL_TYPES)
+        application.run_polling(
+            allowed_updates=Update.ALL_TYPES,
+            close_loop=False,
+        )
+    except TimedOut as exc:
+        logger.warning(f"Telegram timed out: {exc}")
     finally:
         loop.run_until_complete(bakery.aclose())
+        loop.close()
 
 
 if __name__ == "__main__":

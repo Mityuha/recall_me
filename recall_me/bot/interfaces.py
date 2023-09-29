@@ -71,3 +71,22 @@ class EventSaver(Protocol):
         notify_before_days: int = 7,
     ) -> None:
         ...
+
+
+class Storage(Protocol):
+    async def callback_metadata(
+        self,
+        callback_id: str,
+    ) -> Any | None:
+        ...
+
+
+class Router(Protocol):
+    async def route_callback(
+        self,
+        callback_id: str,
+        callback_data: str,
+        callback_metadata: Any,
+        query: Any,
+    ) -> None:
+        ...

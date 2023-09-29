@@ -1,10 +1,15 @@
-from enum import Enum, auto
-from typing import Final
+from ..types import BACK_ARROW, DELETE_EVENT, AllEventsState  # noqa
 
-BACK_ARROW: Final[str] = "back"
-DELETE_EVENT: Final[str] = "del"
+# State = AllEventsState
 
+# class ScreenStateMachine:
+#     def __init__(self) -> None:
+#         self.machine: Machine = Machine(
+#             model=self,
+#             states=AllEventsState,
+#             initial=AllEventsState.NO_MESSAGE,
+#         )
 
-class AllEventsState(Enum):
-    ALL_EVENTS_SCREEN = auto()
-    SINGLE_EVENT_SCREEN = auto()
+#     self.machine.add_transition("message_sent", State.NO_MESSAGE, State.CMD_ALL_EVENTS_SCREEN,)
+#     self.machine.add_transition("cron_message_sent", State.NO_MESSAGE, State.CRON_ALL_EVENTS_SCREEN,)
+#     self.machine.add_transition("")

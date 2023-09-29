@@ -1,14 +1,17 @@
-from asyncio import Queue
-from typing import Final
+from asyncio import create_task, sleep
+from typing import Any, Final
 
 from recall_me.logging import logger
 from telegram import Update
 from telegram.ext import ContextTypes
 
+from .interfaces import Router, Storage
+
 
 class CallbackQuery:
-    def __init__(self, channels: dict[str, Queue]) -> None:
-        self.channels: Final[dict[str, Queue]] = channels
+    def __init__(self, storage: Storage, router: Router) -> None:
+        self.storage: Final[Storage] = storage
+        self.router: Final[Router] = router
 
     def __str__(self) -> str:
         return "[CallbackQuery]"
@@ -31,10 +34,23 @@ class CallbackQuery:
         )
 
         callback_id, callback_data = query.data.rsplit("-", 1)
-        if callback_id not in self.channels:
+        callback_metadata: Any | None = await self.storage.callback_metadata(
+            callback_id
+        )
+
+        if callback_metadata:
             await query.edit_message_text(
-                text="Похоже, что сообщение старое. Попробуйте еще раз"
+                text="Возможно, что сообщение старое. Попробуйте еще раз"
             )
+            await sleep(3.0)
+            await query.delete_message()
             return
 
-        await self.channels[callback_id].put((callback_data, query))
+        await create_task(
+            self.router.route_callback(
+                callback_id=callback_id,
+                callback_data=callback_data,
+                query=query,
+                callback_metadata=callback_metadata,
+            )
+        )

@@ -3,6 +3,8 @@ from typing import Protocol, Sequence
 
 from telegram import Message
 
+from .types import AllEventsState
+
 
 class Event(Protocol):
     eid: int
@@ -34,4 +36,16 @@ class EventsScreen(Protocol):
 
 class EventDeleter(Protocol):
     async def delete_event(self, event_id: str | int) -> None:
+        ...
+
+
+class StorageSave(Protocol):
+    async def save_state(
+        self,
+        *,
+        callback_id: str,
+        user_id: str,
+        message_id: int,
+        current_state: AllEventsState,
+    ) -> None:
         ...

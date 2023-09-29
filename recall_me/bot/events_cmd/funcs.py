@@ -1,3 +1,4 @@
+from typing import Iterable
 from uuid import uuid4
 
 from telegram import (CallbackQuery, InlineKeyboardButton,
@@ -7,14 +8,11 @@ from .interfaces import Event, EventInfo
 from .types import BACK_ARROW, DELETE_EVENT
 
 
-async def send_events(
-    message: Message,
+def events_reply_markup(
     *,
-    events: list[Event],
-    query: CallbackQuery | None,
-) -> str:
-    callback_id: str = str(uuid4())
-
+    callback_id: str,
+    events: Iterable[Event],
+) -> InlineKeyboardMarkup:
     buttons: list[InlineKeyboardButton] = [
         InlineKeyboardButton(
             f"{e.edate.strftime('%d.%m')}  {e.title}",
@@ -25,17 +23,32 @@ async def send_events(
 
     keyboard = [buttons[i : i + 2] for i in range(0, len(buttons), 2)]
     keyboard.append(
-        [InlineKeyboardButton("Закрыть", callback_data=f"{callback_id}-{BACK_ARROW}")]
+        [
+            InlineKeyboardButton(
+                "Закрыть",
+                callback_data=f"{callback_id}-{BACK_ARROW}",
+            )
+        ]
     )
 
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    return InlineKeyboardMarkup(keyboard)
+
+
+async def send_events(
+    message: Message,
+    *,
+    events: list[Event],
+    query: CallbackQuery | None,
+) -> str:
+    str(uuid4())
 
     text: str = "Ваши события"
+    new_message: Message
     if not query:
-        await message.reply_text(text, reply_markup=reply_markup)
+        new_message = await message.reply_text(text, reply_markup=reply_markup)
     else:
-        await query.edit_message_text(text, reply_markup=reply_markup)
-    return callback_id
+        new_message = await query.edit_message_text(text, reply_markup=reply_markup)
+    return new_message.message_id
 
 
 async def show_event(query: CallbackQuery, event: EventInfo) -> str:

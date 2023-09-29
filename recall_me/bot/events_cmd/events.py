@@ -1,36 +1,52 @@
-from asyncio import Queue, create_task, sleep
-from typing import Final
+from typing import Final, Iterable
+from uuid import uuid4
 
-from telegram import Update
+from telegram import InlineKeyboardMarkup, Message, Update
 from telegram.ext import ContextTypes
 
-from .interfaces import Event, EventsGetter, EventsScreen
+from .funcs import events_reply_markup
+from .interfaces import Event, EventsGetter, StorageSave
+from .types import AllEventsState
 
 
 class EventsCommand:
     def __init__(
         self,
-        channels: dict[str, Queue],
         *,
+        storage: StorageSave,
         events_getter: EventsGetter,
-        events_screen: EventsScreen,
     ) -> None:
-        self.channels: Final[dict[str, Queue]] = channels
         self.events_getter: Final[EventsGetter] = events_getter
-        self.events_screen: Final[EventsScreen] = events_screen
+        self.storage: Final[StorageSave] = storage
 
     async def __call__(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
     ) -> None:
         if not update.message:
             return
+        message: Message = update.message
 
-        if not update.message.from_user:
+        if not message.from_user:
             return
 
-        events: list[Event] = await self.events_getter.get_user_events(
-            str(update.message.from_user.id)
+        events: Iterable[Event] = await self.events_getter.get_user_events(
+            str(message.from_user.id)
         )
 
-        create_task(self.events_screen.show_events(update.message, events=events))
-        await sleep(0)
+        user_id: str = str(message.from_user.id)
+        state: AllEventsState = AllEventsState.CMD_ALL_EVENTS_SCREEN
+        callback_id: str = str(uuid4())
+        reply_markup: InlineKeyboardMarkup = events_reply_markup(
+            callback_id=callback_id,
+            events=events,
+        )
+        chat_message: Message = await message.reply_text(
+            "Ваши события",
+            reply_markup=reply_markup,
+        )
+        await self.storage.save_state(
+            callback_id=callback_id,
+            user_id=user_id,
+            message_id=chat_message.message_id,
+            current_state=state,
+        )

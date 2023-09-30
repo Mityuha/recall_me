@@ -12,6 +12,9 @@ class UserEvents:
     async def get_user_events(
         self,
         user_id: str,
+        *,
+        from_date: date | None = None,
+        to_date: date | None = None,
     ) -> list[Event]:
         rows = await self.database.fetch_all(
             "SELECT id, title, description, event_day, event_month, voice_id "
@@ -42,6 +45,11 @@ class UserEvents:
         for event in events:
             if event.edate < today:
                 event.edate = event.edate.replace(year=today.year + 1)
+
+        from_date = from_date or today
+        to_date = to_date or today.replace(year=today.year + 1)
+
+        events = [e for e in events if from_date <= e.edate <= to_date]
 
         events.sort(key=lambda e: e.edate)
         return events

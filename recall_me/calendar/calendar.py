@@ -7,9 +7,8 @@ from calendar_view.config import style  # type: ignore
 from calendar_view.core import data  # type: ignore
 from calendar_view.core.event import Event as CEvent  # type: ignore
 
-from .interfaces import SmartTitleI
+from .interfaces import Event, SmartTitleI
 from .smart_title import SmartTitle
-from .types import Event
 
 
 class SmartCalendar:
@@ -34,17 +33,17 @@ class SmartCalendar:
 
         calendar_events: list[CEvent] = []
         for ev in events:
-            min_date = min(min_date, ev.d)
-            max_date = max(max_date, ev.d)
-            min_t = min(min_t, ev.t1)
-            max_t = max(max_t, ev.t1 + ev.duration)
+            min_date = min(min_date, ev.edate)
+            max_date = max(max_date, ev.edate)
+            min_t = min(min_t, ev.start_hour)
+            max_t = max(max_t, ev.start_hour + ev.duration)
             calendar_events.append(
                 CEvent(
-                    day=ev.d.isoformat(),
-                    start=f"{ev.t1}:00",
-                    end=f"{ev.t1 + ev.duration}:00",
-                    title=self.smart_title(ev.e),
-                    notes=ev.e,
+                    day=ev.edate.isoformat(),
+                    start=f"{ev.start_hour}:00",
+                    end=f"{ev.start_hour + ev.duration}:00",
+                    title=ev.title or self.smart_title(ev.description),
+                    notes=ev.description,
                     style=ev.style,
                 )
             )

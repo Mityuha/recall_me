@@ -49,3 +49,6 @@ class StateStorage:
                     metadata=metadata,
                 )
             )
+
+    async def drop_state(self, callback_id: str) -> None:
+        self.storage = [e for e in self.storage if e.callback_id != callback_id]

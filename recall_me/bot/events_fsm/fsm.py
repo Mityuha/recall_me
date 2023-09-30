@@ -3,7 +3,7 @@ from typing import Any, Final
 from recall_me.logging import logger
 from telegram import CallbackQuery
 
-from .interfaces import CallbackMetadata, StateHandler, StorageSave
+from .interfaces import CallbackMetadata, StateHandler, Storage
 from .types import AllEventsState
 
 
@@ -11,10 +11,10 @@ class CallbackRouter:
     def __init__(
         self,
         *,
-        storage: StorageSave,
+        storage: Storage,
         handlers: dict[Any, StateHandler],
     ) -> None:
-        self.storage: Final[StorageSave] = storage
+        self.storage: Final[Storage] = storage
         self.handlers: Final[dict[Any, StateHandler]] = handlers
 
     def __str__(self) -> str:
@@ -56,6 +56,7 @@ class CallbackRouter:
 
         if new_state == AllEventsState.NO_MESSAGE:
             logger.info(f"{self}: No more message for {user_id}. Close state.")
+            await self.storage.drop_state(callback_id)
             return
 
         await self.storage.save_state(

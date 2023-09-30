@@ -20,8 +20,6 @@ from .date_parser import (DAY_NAME_2_NUM, MONTH_NAME_2_NUM, ComplexDateParser,
                           EventFormatter, MonthTextStrategy)
 from .utils import Ogg2WavConverter, TextRecognizer, check_ffmpeg
 
-# from databases import Database
-
 
 class Container(Bakery):
     _ = Cake(check_ffmpeg)

@@ -5,7 +5,7 @@ from telegram import CallbackQuery
 from .types import AllEventsState
 
 
-class StorageSave(Protocol):
+class Storage(Protocol):
     async def save_state(
         self,
         *,
@@ -15,6 +15,9 @@ class StorageSave(Protocol):
         current_state: AllEventsState,
         metadata: dict | list | None,
     ) -> None:
+        ...
+
+    async def drop_state(self, callback_id: str) -> None:
         ...
 
 

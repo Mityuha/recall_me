@@ -1,24 +1,51 @@
+from dataclasses import dataclass
 from typing import Any
 
+from recall_me.bot.types import AllEventsState
 
-class Storage:
+
+@dataclass
+class State:
+    callback_id: str
+    user_id: str
+    previous_state: AllEventsState
+    current_state: AllEventsState
+    metadata: Any
+
+
+class StateStorage:
     def __init__(self) -> None:
-        ...
+        self.storage: list[State] = []
 
-    async def __aenter__(self) -> "Storage":
-        return self
+    async def callback_metadata(self, callback_id: str) -> Any:
+        for state in self.storage:
+            if state.callback_id == callback_id:
+                return state
 
-    async def __aexit__(self, *_args: Any) -> None:
         return None
 
-    async def callback_received(
+    async def save_state(
         self,
         *,
         callback_id: str,
-        callback_data: str,
-        query: Any,
+        user_id: str,
+        previous_state: AllEventsState,
+        current_state: AllEventsState,
+        metadata: Any
     ) -> None:
-        ...
+        for state in self.storage:
+            if state.callback_id == callback_id:
+                state.previous_state = previous_state
+                state.current_state = current_state
+                state.metadata = metadata
 
-    def __contains__(self, item: Any) -> bool:
-        ...
+        else:
+            self.storage.append(
+                State(
+                    callback_id=callback_id,
+                    user_id=user_id,
+                    previous_state=previous_state,
+                    current_state=current_state,
+                    metadata=metadata,
+                )
+            )

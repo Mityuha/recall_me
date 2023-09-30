@@ -1,10 +1,16 @@
-from typing import Callable, Final, Iterable
+from typing import Callable, Final, Iterable, TypedDict
 
 from recall_me.logging import logger
 from telegram import CallbackQuery, InlineKeyboardMarkup
 
 from ..types import AllEventsState
-from .interfaces import EventInfo, EventsGetter
+from .interfaces import (CallbackMetadata, EventInfo, EventsDeleter,
+                         EventsGetter)
+
+
+class EventMetadata(TypedDict):
+    voice_message_id: int | None
+    event_id: int
 
 
 class SingleEventBack:
@@ -15,17 +21,26 @@ class SingleEventBack:
     def __str__(self) -> str:
         return "[SingleEventBack]"
 
-    async def go_to_all_events(
+    async def __call__(
         self,
-        user_id: str,
+        *,
         callback_id: str,
         callback_data: str,
         query: CallbackQuery,
-        state: AllEventsState,
+        metadata: CallbackMetadata,
     ) -> AllEventsState:
-        logger.debug(f"{self}: Getting all user '{user_id}' events.")
+        logger.debug(f"{self}: Getting all user '{metadata.user_id}' events.")
 
-        events: Iterable[EventInfo] = await self.events.get_user_events(user_id)
+        events: Iterable[EventInfo] = await self.events.get_user_events(
+            metadata.user_id
+        )
+
+        event_metadata: EventMetadata = metadata.metadata
+        if event_metadata.get("voice_message_id"):
+            await query.get_bot().delete_message(
+                chat_id=int(metadata.user_id),
+                message_id=event_metadata["voice_message_id"],
+            )
 
         reply_markup: InlineKeyboardMarkup = self.all_events_markup(
             callback_id=callback_id,
@@ -36,53 +51,52 @@ class SingleEventBack:
         return AllEventsState.CMD_ALL_EVENTS_SCREEN
 
 
-# class AllEventsScreenChosen:
-#     def __init__(self, events: EventInfoGetter) -> None:
-#         self.events: Final[EventInfoGetter] = events
+class SingleEventDelete:
+    def __init__(
+        self,
+        *,
+        all_events_markup: Callable,
+        events_getter: EventsGetter,
+        events_deleter: EventsDeleter,
+    ) -> None:
+        self.all_events_markup: Final[Callable] = all_events_markup
+        self.events_deleter: Final[EventsDeleter] = events_deleter
+        self.events_getter: Final[EventsGetter] = events_getter
 
-#     async def show_single_event(
-#         self,
-#         user_id: str,
-#         callback_id: str,
-#         callback_data: str,
-#         query: CallbackQuery,
-#         state: AllEventsState,
-#     ) -> tuple[AllEventsState, Any]:
-#         event_id: str = callback_data
+    def __str__(self) -> str:
+        return "[SingleEventDelete]"
 
-#         event: EventInfo = await self.events.get_event_info(event_id)
+    async def __call__(
+        self,
+        *,
+        callback_id: str,
+        callback_data: str,
+        query: CallbackQuery,
+        metadata: CallbackMetadata,
+    ) -> AllEventsState:
+        """Delete event and go back."""
+        logger.debug(f"{self}: Getting all user '{metadata.user_id}' events.")
 
-#         buttons: list[list[InlineKeyboardButton]] = [
-#             [
-#                 InlineKeyboardButton(
-#                     "Удалить", callback_data=f"{callback_id}-{DELETE_EVENT}"
-#                 )
-#             ],
-#             [
-#                 InlineKeyboardButton(
-#                     "Назад", callback_data=f"{callback_id}-{BACK_ARROW}"
-#                 )
-#             ],
-#         ]
+        event_metadata: EventMetadata = metadata.metadata
+        if event_metadata.get("voice_message_id"):
+            await query.get_bot().delete_message(
+                chat_id=int(metadata.user_id),
+                message_id=event_metadata["voice_message_id"],
+            )
 
-#         text: str = f"""
-#     <pre>
-#     {event.title}
-#     Дата        : {event.edate.strftime('%d.%m.%Y')}
-#     Описание    : {event.description}
-#     </pre>
-#         """
+        event_id: int = event_metadata["event_id"]
 
-#         await query.edit_message_text(
-#             text,
-#             reply_markup=InlineKeyboardMarkup(buttons),
-#             parse_mode="HTML",
-#         )
-#         voice_message_id: int | None = None
-#         if event.voice_id:
-#             assert query.message
-#             message: Message = query.message
-#             msg: Message = await message.reply_voice(event.voice_id)
-#             voice_message_id = msg.message_id
+        logger.debug(f"{self}: User '{metadata.user_id}': delete event {event_id}")
+        await self.events_deleter.delete_event(event_id)
+        await query.answer("Событие успешно удалено", show_alert=True)
 
-#         return (AllEventsState.SINGLE_EVENT_SCREEN, voice_message_id)
+        events: Iterable[EventInfo] = await self.events_getter.get_user_events(
+            metadata.user_id
+        )
+        reply_markup: InlineKeyboardMarkup = self.all_events_markup(
+            callback_id=callback_id,
+            events=events,
+        )
+
+        await query.edit_message_text("Ваши события", reply_markup=reply_markup)
+        return AllEventsState.CMD_ALL_EVENTS_SCREEN

@@ -1,33 +1,32 @@
-from typing import Final
+from typing import Iterable
 
-from .interfaces import Event
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
+from .interfaces import EventInfo as Event
+from .types import BACK_ARROW
 
 
-class Event2Text:
-    def __init__(self) -> None:
-        self.month_2_text: Final[dict[int, str]] = {
-            1: "января",
-            2: "февраля",
-            3: "марта",
-            4: "апреля",
-            5: "мая",
-            6: "июня",
-            7: "июля",
-            8: "августа",
-            9: "сентября",
-            10: "октября",
-            11: "ноября",
-            12: "декабря",
-        }
-        self.max_month_len: Final[int] = max(
-            len(month) for month in self.month_2_text.values()
+def events_reply_markup(
+    *,
+    callback_id: str,
+    events: Iterable[Event],
+) -> InlineKeyboardMarkup:
+    buttons: list[InlineKeyboardButton] = [
+        InlineKeyboardButton(
+            f"{e.edate.strftime('%d.%m')}  {e.title}",
+            callback_data=f"{callback_id}-{e.eid}",
         )
+        for e in events
+    ]
 
-    def __call__(self, event: Event) -> str:
-        datet: str = (
-            f" {event.edate.day}" if event.edate.day < 10 else f"{event.edate.day}"
-        )
-        montht: str = self.month_2_text[event.edate.month]
-        whitespaces: str = " " * (self.max_month_len - len(montht))
-        # return f"{datet} {montht}{whitespaces}  {event.title}"
-        return f"{datet} {whitespaces}{montht}  {event.title}"
+    keyboard = [buttons[i : i + 2] for i in range(0, len(buttons), 2)]
+    keyboard.append(
+        [
+            InlineKeyboardButton(
+                "Закрыть",
+                callback_data=f"{callback_id}-{BACK_ARROW}",
+            )
+        ]
+    )
+
+    return InlineKeyboardMarkup(keyboard)

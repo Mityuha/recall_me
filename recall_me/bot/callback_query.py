@@ -2,13 +2,13 @@ from asyncio import create_task, sleep
 from typing import Any, Final
 
 from recall_me.logging import logger
-from telegram import Update
+from telegram import CallbackQuery, Update
 from telegram.ext import ContextTypes
 
 from .interfaces import Router, Storage
 
 
-class CallbackQuery:
+class CallbackQueryHandler:
     def __init__(self, storage: Storage, router: Router) -> None:
         self.storage: Final[Storage] = storage
         self.router: Final[Router] = router
@@ -21,7 +21,7 @@ class CallbackQuery:
             logger.info(f"{self}: update received, but no callback_query found")
             return
 
-        query = update.callback_query
+        query: CallbackQuery = update.callback_query
         await query.answer()
         if not query.data:
             logger.info(f"{self}: no callback query data found.")
@@ -38,12 +38,16 @@ class CallbackQuery:
             callback_id
         )
 
-        if callback_metadata:
+        if not callback_metadata:
             await query.edit_message_text(
                 text="Возможно, что сообщение старое. Попробуйте еще раз"
             )
-            await sleep(3.0)
-            await query.delete_message()
+
+            async def sleep_and_delete(query: CallbackQuery) -> None:
+                await sleep(3.0)
+                await query.delete_message()
+
+            await create_task(sleep_and_delete(query))
             return
 
         await create_task(

@@ -1,10 +1,9 @@
-from typing import Final, Iterable
+from typing import Callable, Final, Iterable
 from uuid import uuid4
 
 from telegram import InlineKeyboardMarkup, Message, Update
 from telegram.ext import ContextTypes
 
-from .funcs import events_reply_markup
 from .interfaces import Event, EventsGetter, StorageSave
 from .types import AllEventsState
 
@@ -15,9 +14,11 @@ class EventsCommand:
         *,
         storage: StorageSave,
         events_getter: EventsGetter,
+        events_reply_markup: Callable,
     ) -> None:
         self.events_getter: Final[EventsGetter] = events_getter
         self.storage: Final[StorageSave] = storage
+        self.events_reply_markup: Final[Callable] = events_reply_markup
 
     async def __call__(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
@@ -36,17 +37,18 @@ class EventsCommand:
         user_id: str = str(message.from_user.id)
         state: AllEventsState = AllEventsState.CMD_ALL_EVENTS_SCREEN
         callback_id: str = str(uuid4())
-        reply_markup: InlineKeyboardMarkup = events_reply_markup(
+        reply_markup: InlineKeyboardMarkup = self.events_reply_markup(
             callback_id=callback_id,
             events=events,
         )
-        chat_message: Message = await message.reply_text(
+        await message.reply_text(
             "Ваши события",
             reply_markup=reply_markup,
         )
         await self.storage.save_state(
             callback_id=callback_id,
             user_id=user_id,
-            message_id=chat_message.message_id,
+            previous_state=AllEventsState.NO_MESSAGE,
             current_state=state,
+            metadata=None,
         )

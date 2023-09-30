@@ -3,8 +3,8 @@ from typing import Any, Final
 from recall_me.logging import logger
 from telegram import CallbackQuery
 
-from .interfaces import StateHandler, StorageSave
-from .types import AllEventsState, CallbackMetadata
+from .interfaces import CallbackMetadata, StateHandler, StorageSave
+from .types import AllEventsState
 
 
 class CallbackRouter:
@@ -28,7 +28,7 @@ class CallbackRouter:
         callback_metadata: CallbackMetadata,
         query: CallbackQuery,
     ) -> None:
-        state: AllEventsState = callback_metadata.state
+        state: AllEventsState = callback_metadata.current_state
         user_id = callback_metadata.user_id
 
         handler: StateHandler | None = self.handlers.get(
@@ -39,14 +39,20 @@ class CallbackRouter:
         assert handler
 
         new_state = await handler(
-            user_id=user_id,
             callback_id=callback_id,
             callback_data=callback_data,
             query=query,
-            state=state,
+            metadata=callback_metadata,
         )
+        metadata: Any | None = None
 
-        logger.info(f"{self}: New state for {user_id=}, {callback_id=}: {new_state = }")
+        if isinstance(new_state, tuple):
+            new_state, metadata = new_state
+
+        logger.info(
+            f"{self}: New state for {user_id=}, "
+            f"{callback_id=}: {new_state = }, {metadata = }"
+        )
 
         if new_state == AllEventsState.NO_MESSAGE:
             logger.info(f"{self}: No more message for {user_id}. Close state.")
@@ -55,6 +61,7 @@ class CallbackRouter:
         await self.storage.save_state(
             callback_id=callback_id,
             user_id=user_id,
-            message_id=callback_metadata.message_id,
+            previous_state=state,
             current_state=new_state,
+            metadata=metadata,
         )

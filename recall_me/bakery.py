@@ -1,15 +1,20 @@
-from asyncio import Queue
+from typing import Any
 
 from databases import Database
 
 from bakery import Bakery, Cake
 
-from .bot import (CallbackQuery, Event2Text, EventsConfirmation, Handler,
+from .bot import (CallbackQueryHandler, Event2Text, EventsCommand, Handler,
                   TextEvents, VoiceEvents)
-from .bot.events_cmd import CallbackHandler, EventsCommand
+from .bot.events_fsm import (AllEventsScreenBack, AllEventsScreenChosen,
+                             CallbackRouter, IStateHandler, SaveEventsNo,
+                             SaveEventsYes, SingleEventBack, SingleEventDelete)
+from .bot.types import BACK_ARROW, DELETE_EVENT, NO, YES, AllEventsState
+from .bot.utils import events_reply_markup
 from .calendar import SmartTitle
 from .config import Settings
-from .database import DeleteEvent, EventInfo, SaveEvent, UserEvents
+from .database import (DeleteEvent, EventInfo, SaveEvent, StateStorage,
+                       UserEvents)
 from .date_parser import (DAY_NAME_2_NUM, MONTH_NAME_2_NUM, ComplexDateParser,
                           DateParser, DayMonthTextStrategy, DigitDateStrategy,
                           EventFormatter, MonthTextStrategy)
@@ -65,48 +70,70 @@ class Container(Bakery):
         date_parser=date_parser,
         event_formatter=event_formatter,
     )
+
     event_2_text: Event2Text = Cake(Event2Text)
-    channels: dict[str, Queue] = Cake({})
-    events_confirmation: EventsConfirmation = Cake(
-        EventsConfirmation,
-        channels=channels,
-        event_formatter=event_2_text,
-    )
-
-    callback_query: CallbackQuery = Cake(CallbackQuery, channels)
-
-    database: Database = Cake(Cake(Database, settings.postgres_dsn))
-    event_saver: SaveEvent = Cake(SaveEvent, database)
-
+    state_storage: StateStorage = Cake(StateStorage)
     text_handler: Handler = Cake(
         Handler,
         text_events,
-        events_confirmation=events_confirmation,
-        event_saver=event_saver,
+        storage=state_storage,
         description="TextHandler",
+        event_formatter=event_2_text,
     )
     voice_handler: Handler = Cake(
         Handler,
         voice_events,
-        events_confirmation=events_confirmation,
-        event_saver=event_saver,
+        storage=state_storage,
         description="VoiceHandler",
+        event_formatter=event_2_text,
     )
+
+    database: Database = Cake(Cake(Database, settings.postgres_dsn))
+    event_saver: SaveEvent = Cake(SaveEvent, database)
 
     event_info_getter: EventInfo = Cake(EventInfo, database)
     event_deleter: DeleteEvent = Cake(DeleteEvent, database)
     user_events_getter: UserEvents = Cake(UserEvents, database)
 
-    events_screen: CallbackHandler = Cake(
-        CallbackHandler,
-        channels=channels,
-        event_info_getter=event_info_getter,
-        event_deleter=event_deleter,
+    state_handlers: dict[Any, IStateHandler] = Cake(
+        {
+            (AllEventsState.CMD_ALL_EVENTS_SCREEN, BACK_ARROW): Cake(
+                AllEventsScreenBack
+            ),
+            AllEventsState.CMD_ALL_EVENTS_SCREEN: Cake(
+                AllEventsScreenChosen, event_info_getter
+            ),
+            (AllEventsState.CMD_SINGLE_EVENT_SCREEN, BACK_ARROW): Cake(
+                SingleEventBack,
+                all_events_markup=events_reply_markup,
+                events=user_events_getter,
+            ),
+            (AllEventsState.CMD_SINGLE_EVENT_SCREEN, DELETE_EVENT): Cake(
+                SingleEventDelete,
+                all_events_markup=events_reply_markup,
+                events_getter=user_events_getter,
+                events_deleter=event_deleter,
+            ),
+            (AllEventsState.SAVE_EVENTS_SCREEN, YES): Cake(SaveEventsYes, event_saver),
+            (AllEventsState.SAVE_EVENTS_SCREEN, NO): Cake(SaveEventsNo),
+        }
+    )
+
+    callback_router: CallbackRouter = Cake(
+        CallbackRouter,
+        storage=state_storage,
+        handlers=state_handlers,
+    )
+
+    callback_query_handler: CallbackQueryHandler = Cake(
+        CallbackQueryHandler,
+        storage=state_storage,
+        router=callback_router,
     )
 
     cmd_event_handler: EventsCommand = Cake(
         EventsCommand,
-        channels,
+        storage=state_storage,
         events_getter=user_events_getter,
-        events_screen=events_screen,
+        events_reply_markup=events_reply_markup,
     )

@@ -1,5 +1,6 @@
 from asyncio import gather
 from datetime import date, timedelta
+from io import BytesIO
 from typing import Final, Iterable
 from uuid import uuid4
 
@@ -68,7 +69,7 @@ class Notifier:
 
         await self.bot.send_photo(
             chat_id=user_id,
-            photo=calendar,
+            photo=BytesIO(calendar),
             reply_markup=reply_markup,
         )
 

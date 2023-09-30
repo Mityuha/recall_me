@@ -10,6 +10,6 @@ class BotUsers:
     async def get_bot_users(
         self,
     ) -> Iterable[str]:
-        rows = await self.database.fetch_all("SELECT DISTINCT author_id" "FROM event;")
+        rows = await self.database.fetch_all("SELECT DISTINCT author_id FROM event;")
 
         return [r["author_id"] for r in rows]

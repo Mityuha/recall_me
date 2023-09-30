@@ -37,6 +37,7 @@ class CallbackQueryHandler:
         callback_state: Any | None = await self.storage.callback_state(callback_id)
 
         if not callback_state:
+            logger.warning(f"{self}: User {query.from_user.id}: no callback state for {callback_id = }")
             await query.edit_message_text(
                 text="Возможно, что сообщение старое. Попробуйте еще раз"
             )

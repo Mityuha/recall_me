@@ -64,7 +64,7 @@ class Notifier:
         callback_id: str = str(uuid4())
 
         reply_markup: InlineKeyboardMarkup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton("Настроить", callback_data=callback_id)]]
+            [[InlineKeyboardButton("Настроить", callback_data=f"{callback_id}-cfg")]]
         )
 
         await self.bot.send_photo(

@@ -3,7 +3,7 @@ from typing import Any, Final
 from recall_me.logging import logger
 from telegram import CallbackQuery
 
-from .interfaces import CallbackMetadata, StateHandler, Storage
+from .interfaces import CallbackState, StateHandler, Storage
 from .types import AllEventsState
 
 
@@ -25,11 +25,11 @@ class CallbackRouter:
         *,
         callback_id: str,
         callback_data: str,
-        callback_metadata: CallbackMetadata,
+        callback_state: CallbackState,
         query: CallbackQuery,
     ) -> None:
-        state: AllEventsState = callback_metadata.current_state
-        user_id = callback_metadata.user_id
+        state: AllEventsState = callback_state.current_state
+        user_id = callback_state.user_id
 
         handler: StateHandler | None = self.handlers.get(
             (state, callback_data),
@@ -42,7 +42,7 @@ class CallbackRouter:
             callback_id=callback_id,
             callback_data=callback_data,
             query=query,
-            metadata=callback_metadata,
+            callback_state=callback_state,
         )
         metadata: Any | None = None
 

@@ -81,7 +81,7 @@ class Handler:
                 {
                     "title": e.title,
                     "description": e.description,
-                    "edate": e.edate,
+                    "edate": e.edate.isoformat(),
                     "start_hour": e.start_hour,
                     "duration": e.duration,
                 }

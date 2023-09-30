@@ -21,7 +21,7 @@ class Storage(Protocol):
         ...
 
 
-class CallbackMetadata(Protocol):
+class CallbackState(Protocol):
     user_id: str
     previous_state: AllEventsState
     current_state: AllEventsState
@@ -35,6 +35,6 @@ class StateHandler(Protocol):
         callback_id: str,
         callback_data: str,
         query: CallbackQuery,
-        metadata: CallbackMetadata,
+        callback_state: CallbackState,
     ) -> AllEventsState | tuple[AllEventsState, Any]:
         ...

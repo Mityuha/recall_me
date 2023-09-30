@@ -13,7 +13,7 @@ class EventInfo(Protocol):
 
 
 class Storage(Protocol):
-    async def callback_metadata(
+    async def callback_state(
         self,
         callback_id: str,
     ) -> Any | None:
@@ -26,7 +26,7 @@ class Router(Protocol):
         *,
         callback_id: str,
         callback_data: str,
-        callback_metadata: Any,
+        callback_state: Any,
         query: Any,
     ) -> None:
         ...

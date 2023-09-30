@@ -34,17 +34,15 @@ class CallbackQueryHandler:
         )
 
         callback_id, callback_data = query.data.rsplit("-", 1)
-        callback_metadata: Any | None = await self.storage.callback_metadata(
-            callback_id
-        )
+        callback_state: Any | None = await self.storage.callback_state(callback_id)
 
-        if not callback_metadata:
+        if not callback_state:
             await query.edit_message_text(
                 text="Возможно, что сообщение старое. Попробуйте еще раз"
             )
 
             async def sleep_and_delete(query: CallbackQuery) -> None:
-                await sleep(3.0)
+                await sleep(1.5)
                 await query.delete_message()
 
             await create_task(sleep_and_delete(query))
@@ -55,6 +53,6 @@ class CallbackQueryHandler:
                 callback_id=callback_id,
                 callback_data=callback_data,
                 query=query,
-                callback_metadata=callback_metadata,
+                callback_state=callback_state,
             )
         )

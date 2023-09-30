@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Protocol, Sequence
 
-from ..interfaces import CallbackMetadata  # noqa
+from ..interfaces import CallbackState  # noqa
 
 
 class EventInfo(Protocol):

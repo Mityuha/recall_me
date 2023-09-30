@@ -6,13 +6,13 @@ from recall_me.logging import logger
 from telegram import CallbackQuery
 
 from ..types import AllEventsState
-from .interfaces import CallbackMetadata, EventSaver
+from .interfaces import CallbackState, EventSaver
 
 
 class Event(TypedDict):
     title: str
     description: str
-    edate: date
+    edate: str
     start_hour: int
     duration: int
 
@@ -36,14 +36,14 @@ class SaveEventsYes:
         callback_id: str,
         callback_data: str,
         query: CallbackQuery,
-        metadata: CallbackMetadata,
+        callback_state: CallbackState,
     ) -> AllEventsState:
         logger.info(
-            f"{self}: User '{metadata.user_id}' "
+            f"{self}: User '{callback_state.user_id}' "
             "confirmed events saving. Save events."
         )
 
-        event_metadata: EventMetadata = metadata.metadata
+        event_metadata: EventMetadata = callback_state.metadata
 
         try:
             await gather(
@@ -51,11 +51,11 @@ class SaveEventsYes:
                     self.event_saver.save_event(
                         title=e["title"],
                         description=e["description"],
-                        event_day=e["edate"].day,
-                        event_month=e["edate"].month,
+                        event_day=date.fromisoformat(e["edate"]).day,
+                        event_month=date.fromisoformat(e["edate"]).month,
                         voice_id=event_metadata["voice_file_id"],
                         source_text=event_metadata["message_text"],
-                        author_id=metadata.user_id,
+                        author_id=callback_state.user_id,
                         duration=e["duration"],
                         start_hour=e["start_hour"],
                     )
@@ -91,8 +91,8 @@ class SaveEventsNo:
         callback_id: str,
         callback_data: str,
         query: CallbackQuery,
-        metadata: CallbackMetadata,
+        callback_state: CallbackState,
     ) -> AllEventsState:
-        logger.info(f"{self}: User '{metadata.user_id}' declined events saving.")
+        logger.info(f"{self}: User '{callback_state.user_id}' declined events saving.")
         await query.edit_message_text(text="Хорошо. Попробуйте еще раз.")
         return AllEventsState.NO_MESSAGE

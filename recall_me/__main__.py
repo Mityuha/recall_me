@@ -1,12 +1,26 @@
+import traceback
 from asyncio import new_event_loop, set_event_loop
 
 from telegram import Update
 from telegram.error import TimedOut
 from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
-                          MessageHandler, filters)
+                          ContextTypes, MessageHandler, filters)
 
 from .bakery import Container
 from .logging import logger
+
+
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.error(f"Exception while handling an update: {context.error}")
+
+    tb_list = traceback.format_exception(
+        None,
+        context.error,
+        context.error.__traceback__,  # type: ignore
+    )
+    tb_string = "".join(tb_list)
+
+    logger.error(tb_string)
 
 
 def main() -> None:
@@ -27,6 +41,8 @@ def main() -> None:
 
     application.add_handler(CallbackQueryHandler(bakery.callback_query_handler.handle))
     application.add_handler(CommandHandler("events", bakery.cmd_event_handler))
+
+    application.add_error_handler(error_handler)
 
     # Run the bot until the user presses Ctrl-C
     try:

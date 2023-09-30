@@ -5,7 +5,7 @@ from telegram import (CallbackQuery, InlineKeyboardButton,
                       InlineKeyboardMarkup, Message)
 
 from ..types import BACK_ARROW, DELETE_EVENT, AllEventsState
-from .interfaces import CallbackMetadata, EventInfo, EventInfoGetter
+from .interfaces import CallbackState, EventInfo, EventInfoGetter
 
 
 class AllEventsScreenBack:
@@ -15,9 +15,9 @@ class AllEventsScreenBack:
         callback_id: str,
         callback_data: str,
         query: CallbackQuery,
-        metadata: CallbackMetadata,
+        callback_state: CallbackState,
     ) -> AllEventsState:
-        logger.debug(f"EventsScreenBack: User '{metadata.user_id}' closed events")
+        logger.debug(f"EventsScreenBack: User '{callback_state.user_id}' closed events")
 
         await query.delete_message()
         return AllEventsState.NO_MESSAGE
@@ -33,7 +33,7 @@ class AllEventsScreenChosen:
         callback_id: str,
         callback_data: str,
         query: CallbackQuery,
-        metadata: CallbackMetadata,
+        callback_state: CallbackState,
     ) -> tuple[AllEventsState, Any]:
         event_id: str = callback_data
 

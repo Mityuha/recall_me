@@ -70,7 +70,8 @@ class Container(Bakery):
     )
 
     event_2_text: Event2Text = Cake(Event2Text)
-    state_storage: StateStorage = Cake(StateStorage)
+    database: Database = Cake(Cake(Database, settings.postgres_dsn))
+    state_storage: StateStorage = Cake(StateStorage, database)
     text_handler: Handler = Cake(
         Handler,
         text_events,
@@ -86,7 +87,6 @@ class Container(Bakery):
         event_formatter=event_2_text,
     )
 
-    database: Database = Cake(Cake(Database, settings.postgres_dsn))
     event_saver: SaveEvent = Cake(SaveEvent, database)
 
     event_info_getter: EventInfo = Cake(EventInfo, database)

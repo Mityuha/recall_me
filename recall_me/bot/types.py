@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import Enum
 from typing import Final
 
 BACK_ARROW: Final[str] = "back"
@@ -8,11 +8,11 @@ NO: Final[str] = "0"
 
 
 class AllEventsState(Enum):
-    NO_MESSAGE = auto()
-    CMD_ALL_EVENTS_SCREEN = auto()
-    CMD_SINGLE_EVENT_SCREEN = auto()
-    CRON_NOTIFY_MESSAGE_SCREEN = auto()
-    CRON_ALL_EVENTS_SCREEN = auto()
-    CRON_SINGLE_EVENT_SCREEN = auto()
+    NO_MESSAGE = 0
+    CMD_ALL_EVENTS_SCREEN = 1
+    CMD_SINGLE_EVENT_SCREEN = 2
+    CRON_NOTIFY_MESSAGE_SCREEN = 3
+    CRON_ALL_EVENTS_SCREEN = 4
+    CRON_SINGLE_EVENT_SCREEN = 5
     #
-    SAVE_EVENTS_SCREEN = auto()
+    SAVE_EVENTS_SCREEN = 6

@@ -58,9 +58,7 @@ class Notifier:
             to_date=to_date,
         )
 
-        if not any(
-            e.edate in (from_date, from_date + timedelta(days=3)) for e in events
-        ):
+        if not any(e.edate in (today, today + timedelta(days=3)) for e in events):
             logger.info(
                 f"{self}: User {user_id} has no today's or 3 days before events."
             )

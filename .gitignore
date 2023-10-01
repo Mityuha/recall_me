@@ -136,3 +136,6 @@ request.sh
 
 data/
 .DS_STORE
+message.png
+
+*.sql

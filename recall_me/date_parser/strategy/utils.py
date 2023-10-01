@@ -1,9 +1,18 @@
 from datetime import date
 from typing import Final
 
-from nltk.stem.snowball import RussianStemmer
+from nltk.stem.snowball import RussianStemmer  # type: ignore
 
 RU_STEMMER: Final[RussianStemmer] = RussianStemmer()
+
+__all__ = [
+    "stem_all",
+    "MONTH_NUM_2_NAME",
+    "MONTH_NUM_2_NAME_STEM",
+    "MONTH_NAME_2_NUM",
+    "DAY_NAME_2_NUM",
+    "DAY_NUM_2_NAME",
+]
 
 
 def stem_all(sentence: str) -> str:

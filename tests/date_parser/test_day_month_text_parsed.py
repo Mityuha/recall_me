@@ -4,9 +4,9 @@ from random import choice
 from typing import Iterator
 
 import pytest
-from recall_me.date_parser import DayTextDateParser
-from recall_me.date_parser.utils import DAY_NUM_2_NAME
-from recall_me.date_parser.utils import MONTH_NUM_2_NAME as MONTHS
+from recall_me.date_parser import DAY_NUM_2_NAME
+from recall_me.date_parser import MONTH_NUM_2_NAME as MONTHS
+from recall_me.date_parser import DateParser, DayMonthTextStrategy
 
 from .constants import DATES, Faker
 
@@ -71,7 +71,7 @@ def generate_any_text_daymonth_dates(
 
 @pytest.mark.parametrize("sentence, expected", generate_any_text_daymonth_dates(DATES))
 def test_text_daymonth_dates(sentence: str, expected: list[date]) -> None:
-    results: list[date] = DayTextDateParser().parse(sentence)
+    results: list[date] = DateParser(DayMonthTextStrategy()).parse(sentence)
     assert set(expected) == set(results)
 
 
@@ -111,7 +111,13 @@ def test_text_daymonth_dates(sentence: str, expected: list[date]) -> None:
     ),
 )
 def test_text_daymonth_extra(sentence: str, expected: date) -> None:
-    results: list[date] = DayTextDateParser().parse(sentence)
+    results: list[date] = DateParser(DayMonthTextStrategy()).parse(sentence)
     assert len(results) == 1
     assert results[0].month == expected.month
     assert results[0].day == expected.day
+
+
+@pytest.mark.parametrize("sentence", ("тридцать первого сентября едем в иск",))
+def test_text_daymonth_bad_day(sentence: str) -> None:
+    results: list[date] = DateParser(DayMonthTextStrategy()).parse(sentence)
+    assert not len(results)

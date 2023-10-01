@@ -5,16 +5,19 @@ description = ""
 authors = ["mityuha <mit.makaroff@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.11"
-rutimeparser = "^1.1.1"
-dateparser = "^1.1.8"
+python = ">=3.10,<3.12"
 pymystem3 = "^0.2.0"
 pytest = "^7.4.0"
 Faker = "^19.3.0"
 nltk = "^3.8.1"
 vosk = "0.3.44"
 python-telegram-bot = "^20.4"
-loguru = "^0.7.0"
+pydantic = "<2.0"
+ffmpeg-python = "^0.2.0"
+calendar-view = "^2.3.2"
+pillow = "9.5.0"
+fresh-bakery = "^0.2.1"
+databases = {extras = ["postgresql"], version = "^0.8.0"}
 
 [tool.poetry.dev-dependencies]
 black = "^23.7.0"
@@ -23,7 +26,17 @@ isort = "^5.12.0"
 ruff = "^0.0.284"
 autoflake = "^2.2.0"
 PyAudio = "^0.2.13"
+pytest-mock = "^3.11.1"
+
+[tool.poetry.group.dev.dependencies]
+psycopg2-binary = "^2.9.7"
+alembic = "^1.12.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.ruff]
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401", "F403"]

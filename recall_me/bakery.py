@@ -7,8 +7,11 @@ from bakery import Bakery, Cake
 from .bot import (CallbackQueryHandler, Event2Text, EventsCommand, Handler,
                   TextEvents, VoiceEvents)
 from .bot.events_fsm import (AllEventsScreenBack, AllEventsScreenChosen,
-                             CallbackRouter, IStateHandler, SaveEventsNo,
-                             SaveEventsYes, SingleEventBack, SingleEventDelete)
+                             CallbackRouter, CronAllEventsScreenBack,
+                             CronAllEventsScreenChosen, CronConfigureClick,
+                             CronSingleEventBack, CronSingleEventDelete,
+                             IStateHandler, SaveEventsNo, SaveEventsYes,
+                             SingleEventBack, SingleEventDelete)
 from .bot.types import BACK_ARROW, DELETE_EVENT, NO, YES, AllEventsState
 from .bot.utils import events_reply_markup
 from .calendar import SmartTitle
@@ -114,6 +117,24 @@ class Container(Bakery):
             ),
             (AllEventsState.SAVE_EVENTS_SCREEN, YES): Cake(SaveEventsYes, event_saver),
             (AllEventsState.SAVE_EVENTS_SCREEN, NO): Cake(SaveEventsNo),
+            AllEventsState.CRON_NOTIFY_MESSAGE_SCREEN: Cake(
+                CronConfigureClick,
+                events_reply_markup,
+            ),
+            (AllEventsState.CRON_ALL_EVENTS_SCREEN, BACK_ARROW): Cake(
+                CronAllEventsScreenBack
+            ),
+            AllEventsState.CRON_ALL_EVENTS_SCREEN: Cake(
+                CronAllEventsScreenChosen, event_info_getter
+            ),
+            (AllEventsState.CRON_SINGLE_EVENT_SCREEN, BACK_ARROW): Cake(
+                CronSingleEventBack, events_reply_markup
+            ),
+            (AllEventsState.CRON_SINGLE_EVENT_SCREEN, DELETE_EVENT): Cake(
+                CronSingleEventDelete,
+                events_reply_markup=events_reply_markup,
+                events_deleter=event_deleter,
+            ),
         }
     )
 

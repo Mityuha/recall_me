@@ -3,6 +3,7 @@ from typing import Any, Final
 
 from recall_me.logging import logger
 from telegram import CallbackQuery, Update
+from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 
 from .interfaces import Router, Storage
@@ -37,10 +38,16 @@ class CallbackQueryHandler:
         callback_state: Any | None = await self.storage.callback_state(callback_id)
 
         if not callback_state:
-            logger.warning(f"{self}: User {query.from_user.id}: no callback state for {callback_id = }")
-            await query.edit_message_text(
-                text="Возможно, что сообщение старое. Попробуйте еще раз"
+            logger.warning(
+                f"{self}: User {query.from_user.id}: "
+                f"no callback state for {callback_id = }"
             )
+            try:
+                await query.edit_message_text(
+                    text="Возможно, что сообщение старое. Попробуйте еще раз"
+                )
+            except BadRequest:
+                await query.answer("Сообщение устарело", show_alert=True)
 
             async def sleep_and_delete(query: CallbackQuery) -> None:
                 await sleep(1.5)

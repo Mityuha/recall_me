@@ -31,6 +31,11 @@ class CallbackRouter:
         state: AllEventsState = callback_state.current_state
         user_id = callback_state.user_id
 
+        logger.debug(
+            f"{self}: callback from user {user_id} received. "
+            f"User state: {state}, {callback_data = }"
+        )
+
         handler: StateHandler | None = self.handlers.get(
             (state, callback_data),
             self.handlers.get(state, None),

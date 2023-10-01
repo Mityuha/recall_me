@@ -15,7 +15,7 @@ class EventInfo(Protocol):
 
 
 class EventInfoGetter(Protocol):
-    async def get_event_info(self, event_id: str | int) -> EventInfo:
+    async def get_event_info(self, event_id: str | int) -> EventInfo | None:
         ...
 
 

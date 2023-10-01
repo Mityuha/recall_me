@@ -5,10 +5,11 @@ from telegram import (CallbackQuery, InlineKeyboardButton,
                       InlineKeyboardMarkup, Message)
 
 from ..types import BACK_ARROW, DELETE_EVENT, AllEventsState
+from .cron_utils import CronEvent
 from .interfaces import CallbackState, EventInfo, EventInfoGetter
 
 
-class AllEventsScreenBack:
+class CronAllEventsScreenBack:
     @staticmethod
     async def __call__(
         *,
@@ -16,19 +17,25 @@ class AllEventsScreenBack:
         callback_data: str,
         query: CallbackQuery,
         callback_state: CallbackState,
-    ) -> AllEventsState:
-        logger.debug(f"EventsScreenBack: User '{callback_state.user_id}' closed events")
+    ) -> tuple[AllEventsState, Any]:
+        logger.debug(
+            f"[CronEventsScreenBack]: User '{callback_state.user_id}' closed events"
+        )
 
-        await query.delete_message()
-        return AllEventsState.NO_MESSAGE
+        reply_markup = InlineKeyboardMarkup(
+            [[InlineKeyboardButton("Настроить", callback_data=f"{callback_id}-cfg")]]
+        )
+
+        await query.edit_message_caption("", reply_markup=reply_markup)
+        return AllEventsState.CRON_NOTIFY_MESSAGE_SCREEN, callback_state.metadata
 
 
-class AllEventsScreenChosen:
+class CronAllEventsScreenChosen:
     def __init__(self, events: EventInfoGetter) -> None:
         self.events: Final[EventInfoGetter] = events
 
     def __str__(self) -> str:
-        return "[AllEventsScreenChosen]"
+        return "[CronAllEventsScreenChosen]"
 
     async def __call__(
         self,
@@ -43,7 +50,11 @@ class AllEventsScreenChosen:
         event: EventInfo | None = await self.events.get_event_info(event_id)
         if not event:
             logger.debug(f"{self}: It seems that event {event_id} was deleted.")
-            return (AllEventsState.CMD_ALL_EVENTS_SCREEN, None)
+            events: list[CronEvent] = [
+                e for e in callback_state.metadata if e["eid"] != int(event_id)
+            ]
+
+            return (AllEventsState.CRON_ALL_EVENTS_SCREEN, events)
 
         buttons: list[list[InlineKeyboardButton]] = [
             [
@@ -64,7 +75,7 @@ class AllEventsScreenChosen:
 </pre>
         """
 
-        await query.edit_message_text(
+        await query.edit_message_caption(
             text,
             reply_markup=InlineKeyboardMarkup(buttons),
             parse_mode="HTML",
@@ -77,8 +88,9 @@ class AllEventsScreenChosen:
             voice_message_id = msg.message_id
 
         return (
-            AllEventsState.CMD_SINGLE_EVENT_SCREEN,
+            AllEventsState.CRON_SINGLE_EVENT_SCREEN,
             {
+                "events": callback_state.metadata,
                 "voice_message_id": voice_message_id,
                 "event_id": event.eid,
             },

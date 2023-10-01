@@ -27,9 +27,8 @@ class UserEvents(Protocol):
     async def get_user_events(
         self,
         user_id: str,
-        *,
-        from_date: date | None = None,
-        to_date: date | None = None,
+        from_date: date,
+        to_date: date,
     ) -> Iterable[EventInfo]:
         ...
 
@@ -49,4 +48,9 @@ class StorageSave(Protocol):
         current_state: AllEventsState,
         metadata: dict | list | None,
     ) -> None:
+        ...
+
+
+class HoursGrid(Protocol):
+    def sort_events(self, enumber: int) -> list[int]:
         ...

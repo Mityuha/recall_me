@@ -2,7 +2,8 @@ from typing import Final
 
 
 class HoursGrid:
-    def __init__(self, *, step: int = 2) -> None:
+    def __init__(self, *, duration: int = 2) -> None:
+        step = duration
         self.hours1: Final[list[int]] = [h for h in range(10, 18, step)]
         self.hours2: Final[list[int]] = [h for h in range(8, 18, step)]
         self.hours3: Final[list[int]] = [h for h in range(8, 22, step)]

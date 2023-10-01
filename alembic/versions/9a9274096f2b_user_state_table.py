@@ -51,6 +51,12 @@ def upgrade() -> None:
         sa.Column(
             "event_metadata", postgresql.JSONB(astext_type=sa.Text()), nullable=True
         ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(
             ["current_state"], ["screen_state.state_id"], ondelete="CASCADE"
         ),

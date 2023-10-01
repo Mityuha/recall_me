@@ -1,4 +1,5 @@
-from sqlalchemy import Column, ForeignKey, Integer, String  # type: ignore
+from sqlalchemy import Integer  # type: ignore
+from sqlalchemy import Column, DateTime, ForeignKey, String, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import declarative_base  # type: ignore
 
@@ -51,3 +52,8 @@ class EventState(DeclarativeBase):
         Integer, ForeignKey("screen_state.state_id", ondelete="CASCADE"), nullable=False
     )
     event_metadata = Column(JSONB, nullable=True)
+    updated_at = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=text("now()"),
+    )

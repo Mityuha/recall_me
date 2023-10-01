@@ -1,5 +1,6 @@
 import json
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Final
 
 from recall_me.bot.types import AllEventsState
@@ -56,7 +57,8 @@ class StateStorage:
             DO UPDATE SET
             previous_state = :previous_state,
             current_state = :current_state,
-            event_metadata = :event_metadata;
+            event_metadata = :event_metadata,
+            updated_at = :updated_at;
             """,
             values={
                 "callback_id": callback_id,
@@ -64,6 +66,7 @@ class StateStorage:
                 "previous_state": previous_state.value,
                 "current_state": current_state.value,
                 "event_metadata": json.dumps(metadata),
+                "updated_at": datetime.now(),
             },
         )
 

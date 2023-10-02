@@ -9,6 +9,7 @@ from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
 from .bakery import Container
 from .logging import logger
 import bakery
+bakery.logger = None
 
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -26,7 +27,6 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 
 def main() -> None:
     # Create the Application and pass it your bot's token.
-    bakery.logger = None
 
     loop = new_event_loop()
     set_event_loop(loop)

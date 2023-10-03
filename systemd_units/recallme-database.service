@@ -1,0 +1,14 @@
+[Unit]
+Description=Recall Me Database
+After=network.target
+
+[Service]
+CPUQuota=20%
+Type=oneshot
+RemainAfterExit=true
+WorkingDirectory=/home/bot/recall_me
+ExecStart=/usr/local/bin/docker-compose up -d --remove-orphans
+ExecStop=/usr/local/bin/docker-compose down
+
+[Install]
+WantedBy=multi-user.target

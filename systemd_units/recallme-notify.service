@@ -1,0 +1,17 @@
+[Unit]
+Description=Recall Me Notifications
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+CPUQuota=10%
+Environment="RECALL_ME_BOT_TOKEN=<YOUR-TOKEN-HERE>"
+Type=idle
+WorkingDirectory=/home/bot/recall_me
+ExecStart=/home/bot/recall_me/scripts/notify.sh
+User=bot
+Group=bot
+
+[Install]
+WantedBy=multi-user.target

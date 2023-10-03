@@ -1,0 +1,14 @@
+[Unit]
+Description=Recall Me Database Dump
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+CPUQuota=10%
+Type=idle
+WorkingDirectory=/home/bot/recall_me
+ExecStart=/home/bot/recall_me/scripts/pg_backup.sh
+
+[Install]
+WantedBy=multi-user.target

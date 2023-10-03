@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-source ${HOME}/.bashrc
-echo "Executing cron..."
-poetry run python3 -m cron > last_notify.log
-echo "Notifications were done."
+POETRY="/home/bot/.local/bin/poetry"
+RECALL_PATH="/home/bot/recall_me"
+${POETRY} --directory ${RECALL_PATH} run python3 -m cron

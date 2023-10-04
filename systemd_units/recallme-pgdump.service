@@ -1,12 +1,10 @@
 [Unit]
 Description=Recall Me Database Dump
-After=network.target
+Wants=recallme-pgdump.timer
 
 [Service]
 Type=oneshot
-RemainAfterExit=true
-CPUQuota=10%
-Type=idle
+CPUQuota=5%
 WorkingDirectory=/home/bot/recall_me
 ExecStart=/home/bot/recall_me/scripts/pg_backup.sh
 

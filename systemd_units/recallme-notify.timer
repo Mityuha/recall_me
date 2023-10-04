@@ -1,0 +1,11 @@
+[Unit]
+Description=Recall Me Notification Timer
+Requires=recallme-notify.service
+
+[Timer]
+Unit=recallme-notify.service
+OnCalendar=*-*-* *:*:00
+# OnCalendar=*-*-* 13:07:00
+
+[Install]
+WantedBy=timers.target

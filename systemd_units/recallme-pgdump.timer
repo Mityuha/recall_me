@@ -1,0 +1,10 @@
+[Unit]
+Description=Recall Me Pgdump Timer
+Requires=recallme-pgdump.service
+
+[Timer]
+Unit=recallme-pgdump.service
+OnCalendar=*-*-* 05:07:00
+
+[Install]
+WantedBy=timers.target

@@ -6,9 +6,11 @@ from telegram.error import TimedOut
 from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
                           ContextTypes, MessageHandler, filters)
 
+import bakery
+
 from .bakery import Container
 from .logging import logger
-import bakery
+
 bakery.logger = None
 
 

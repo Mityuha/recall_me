@@ -17,11 +17,13 @@ class VoiceEvents:
         ogg_2_wav: Ogg2WavConverter,
         date_parser: DateParser,
         event_formatter: EventFormatter,
+        voice_duration_seconds: int = 10,
     ) -> None:
         self.text_recognizer: Final[TextRecognizer] = text_recognizer
         self.ogg_2_wav: Final[Ogg2WavConverter] = ogg_2_wav
         self.date_parser: Final[DateParser] = date_parser
         self.event_formatter: Final[EventFormatter] = event_formatter
+        self.voice_duration_seconds: Final[int] = voice_duration_seconds
 
     def __str__(self) -> str:
         return "[VoiceEvents]"
@@ -34,6 +36,15 @@ class VoiceEvents:
     ) -> Sequence[Event]:
         if not update.message or not update.message.voice:
             return []
+
+        if update.message.voice.duration >= self.voice_duration_seconds - 1:
+            await update.message.reply_text(
+                "Голосовое слишком длинное. "
+                f"Старайтесь уложиться в {self.voice_duration_seconds} ceкунд"
+            )
+            raise ValueError(
+                f"User '{update.message.chat.username}' sent long voice message."
+            )
 
         # get basic info about the voice note file and prepare it for downloading
         new_file = await context.bot.get_file(update.message.voice.file_id)

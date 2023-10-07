@@ -14,9 +14,11 @@ class TextEvents:
         *,
         date_parser: DateParser,
         event_formatter: EventFormatter,
+        max_text_len: int = 256,
     ) -> None:
         self.date_parser: Final[DateParser] = date_parser
         self.event_formatter: Final[EventFormatter] = event_formatter
+        self.max_text_len: int = max_text_len
 
     def __str__(self) -> str:
         return "[TextEvents]"
@@ -31,7 +33,18 @@ class TextEvents:
             return []
 
         text = update.message.text
-        logger.debug(f"{self}: message received: {text}")
+        logger.debug(
+            f"{self}: message received: {text} (@{update.message.chat.username})"
+        )
+
+        if len(text) > self.max_text_len:
+            await update.message.reply_text(
+                f"Cообщение слишком длинное ({len(text)} символов)."
+                f"Постарайтесь уложиться в {self.max_text_len} символов"
+            )
+            raise ValueError(
+                f"User '{update.message.chat.username}' sent long text message."
+            )
 
         raw_events: dict[str, list[date]] = self.date_parser.parse(text)
         logger.debug(f"{self}: events parsed: {raw_events}")

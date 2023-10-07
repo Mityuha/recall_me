@@ -78,8 +78,8 @@ async def main() -> None:
                 str(config.pg_dump),
                 "--column-inserts",
                 "--data-only",
+                *exclude_tables.split(" "),
                 str(config.postgres_dsn),
-                exclude_tables,
             ],
             stdout=bpath,
         )

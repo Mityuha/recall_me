@@ -1,12 +1,16 @@
 [Unit]
 Description=Recall Me Database Dump
 Wants=recallme-pgdump.timer
+After=network.target
 
 [Service]
 Type=oneshot
-CPUQuota=5%
+CPUQuota=10%
+Environment="RECALL_ME_BOT_TOKEN=<YOUR-TOKEN-HERE>"
 WorkingDirectory=/home/bot/recall_me
-ExecStart=/home/bot/recall_me/scripts/pg_backup.sh
+ExecStart=/home/bot/recall_me/scripts/run_pg_backup.sh
+User=bot
+Group=bot
 
 [Install]
 WantedBy=multi-user.target

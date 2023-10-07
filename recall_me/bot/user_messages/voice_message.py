@@ -40,7 +40,7 @@ class VoiceEvents:
         if update.message.voice.duration >= self.voice_duration_seconds - 1:
             await update.message.reply_text(
                 "Голосовое слишком длинное. "
-                f"Старайтесь уложиться в {self.voice_duration_seconds} ceкунд"
+                f"Постарайтесь уложиться в {self.voice_duration_seconds} ceкунд"
             )
             raise ValueError(
                 f"User '{update.message.chat.username}' sent long voice message."

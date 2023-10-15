@@ -8,7 +8,6 @@ Environment="RECALL_ME_BOT_TOKEN=<YOUR-TOKEN-HERE>"
 Type=idle
 WorkingDirectory=/home/bot/recall_me
 ExecStart=/home/bot/recall_me/scripts/run_recall_me.sh
-KillMode=process
 Restart=always
 User=bot
 Group=bot
